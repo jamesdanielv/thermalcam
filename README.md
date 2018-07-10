@@ -4,7 +4,7 @@
 
 this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries.
 
-since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the reall issues are the display update speed. anything to reduce display writes increases performance. free memory has improved drastivally.
+since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved drastivally.
 
 memory usage from aruino ide:
 Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes.
@@ -16,7 +16,7 @@ faster more memory efficient way of thermal cam imaging
 1) moves color translate tables to progmem freeing 512 bytes
 2) incorporates a buffer for temp reads so we only update areas on screen that change
 3) adds bandwidth compression so most critical areas get updated first if cpu limited, or lcd slow
-4) impliments a tripolor implimation of interpolation (3 sample makes sub samples 
+4) impliments 3 sample interpolation (3 sample makes sub samples) 
 5) we have 8x8 , 16x16, 32x32 sub sampling real time on arduin using spi display. 
 
 
