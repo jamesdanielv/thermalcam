@@ -1,6 +1,6 @@
 # thermalcam
 
-//this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the imense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
+//this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
 this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries.
 
