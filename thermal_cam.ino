@@ -1,3 +1,6 @@
+//this is better with included zip package that has all needed libraries in it for testing. 
+//some changes may be needed to have includes location changes
+
 /***************************************************************************
   This is a library for the AMG88xx GridEYE 8x8 IR camera
   This sketch makes a 64 pixel thermal camera with the GridEYE sensor
@@ -117,7 +120,7 @@ void setup() {
 //=========================]|| to greatest  ||==========================
 //   bandwith compressor    ||    changed   || (by james villeneuve 2018)
 #define speedUpCompression 8 //lower number is faster (it sets priority pixels amount, however too much means rest of display updates more slowly)
-
+// also includes code to make sure every pixel updates but at a slower rate (1/8)
 
 //higher number precision means more change allowed for pixel noise
 
