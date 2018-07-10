@@ -2,6 +2,8 @@
 
 //this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the imense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
+since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the reall issues are the display update speed. anything to reduce display writes increases performance.
+
 memory usage from aruino ide:
 Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes.
 Global variables use 927 bytes (45%) of dynamic memory, leaving 1,121 bytes for local variables. Maximum is 2,048 bytes.
@@ -26,3 +28,6 @@ color table needs to be updated with more resolution detail for higher resolutio
 to change resolution look for interpolatemode at top of page. change it to 1,2, or 3
 
 to optimize work flow change optimize at top of page 0,1,2. 0 is no optimizations, 1 is cached pixles, 2 is bandwith buffer prioritization with redundsnd pixel updates (so screen clears faster)
+
+if optimize is set to 2, then change: 
+#define speedUpCompression 8, to a lower or higher number, lower than 8 is not recomended, and above 63 does little to nothing since there are only 64 pixels of data being sub sampled
