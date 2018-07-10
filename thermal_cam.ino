@@ -1,6 +1,8 @@
 //this is better with included zip package that has all needed libraries in it for testing. 
-//some changes may be needed to have includes location changes
-
+//some changes may be needed to have includes location changes also spixx.h just uses libray in file change back to <spi.h>
+//this is the only file where code changes are, so just replace old file with this one 
+//and change libary include file locations
+//located here on github :https://github.com/jamesdanielv/thermalcam/edit/master/thermal_cam.ino
 /***************************************************************************
   This is a library for the AMG88xx GridEYE 8x8 IR camera
   This sketch makes a 64 pixel thermal camera with the GridEYE sensor
