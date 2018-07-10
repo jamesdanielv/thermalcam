@@ -2,7 +2,9 @@
 
 //this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the imense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
-since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the reall issues are the display update speed. anything to reduce display writes increases performance.
+this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries.
+
+since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the reall issues are the display update speed. anything to reduce display writes increases performance. free memory has improved drastivally.
 
 memory usage from aruino ide:
 Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes.
