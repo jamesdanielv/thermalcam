@@ -2,6 +2,11 @@
 
 //this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the imense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
+memory usage from aruino ide:
+Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes.
+Global variables use 927 bytes (45%) of dynamic memory, leaving 1,121 bytes for local variables. Maximum is 2,048 bytes.
+
+
 faster more memory efficient way of thermal cam imaging
 //this libray does following
 1) moves color translate tables to progmem freeing 512 bytes
