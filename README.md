@@ -16,7 +16,7 @@ faster more memory efficient way of thermal cam imaging
 1) moves color translate tables to progmem freeing 512 bytes
 2) incorporates a buffer for temp reads so we only update areas on screen that change
 3) adds bandwidth compression so most critical areas get updated first if cpu limited, or lcd slow
-4) impliments 3 sample interpolation (3 sample makes sub samples) 
+4) impliments 3 sample interpolation (3 sample makes sub samples) wihthout need for a scaled buffer
 5) we have 8x8 , 16x16, 32x32 sub sampling real time on arduin using spi display. 
 
 
