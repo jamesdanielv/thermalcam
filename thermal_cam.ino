@@ -42,7 +42,7 @@
 // 0 no optimse |1 pixels only written whe color changed| 2 pixels also optimized for most changed ones first (deals with noise issues)
 #define optimize 2
 
-#define interpolatemode 2 //can be 0-2,4,8,16,32,64,128,256,512, 0--> 8x8 resolution,  1--> 16x16 resolution -->512x512 (higher resolution needs more color detail to be tested. 
+#define interpolatemode 1 //can be 0-2,4,8,16,32,64,128,256,512, 0--> 8x8 resolution,  1--> 16x16 resolution -->512x512 (higher resolution needs more color detail to be tested. 
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
 const PROGMEM uint16_t camColors[] =  {0x480F,
