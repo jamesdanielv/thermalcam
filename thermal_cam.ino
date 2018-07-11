@@ -1,7 +1,9 @@
 //this is better with included zip package that has all needed libraries in it for testing. 
+//this is a work in process. 16x16 subsample seems to work ok, trying to verify 32x32 and add up to 512 by 512
 //some changes may be needed to have includes location changes also spixx.h just uses libray in file change back to <spi.h>
 //this is the only file where code changes are, so just replace old file with this one 
 //and change libary include file locations
+//32x32 might need work. will need to first increase color table to be sure
 //located here on github :https://github.com/jamesdanielv/thermalcam/edit/master/thermal_cam.ino
 /***************************************************************************
   This is a library for the AMG88xx GridEYE 8x8 IR camera
