@@ -179,7 +179,7 @@ if (i>7){i=0;k++;}
  
     //we now compress and only update pixels on screen that change the most! it works and over time they all change!
 #if optimize >1 
-   if  ((pixelsbuf[i+j*8] -colorIndex)>compressionflux ||(colorIndex-pixelsbuf[i+j*8]>compressionflux ||i+j*8==(i+j*8)|runagain)){
+   if  ((pixelsbuf[i+j*8] -colorIndex)>compressionflux ||(colorIndex-pixelsbuf[i+j*8]>compressionflux ||i+j*8==(i+j*8)|runagain)){//runagain value just esuresallows non priority pixel areas to update as well besides noise
     //we only draw if it is pixle with higher priority of change AND PIXEL IS NOT SAME COLOR ALREADY
 #endif    
 //below checks the buffer 
@@ -248,7 +248,7 @@ if (interpolate == 2){
 //[2][6][a][e]
 //[3][7][b][f]
   //fast subdivide low memory pixel enhancing code (by James Villeneuve 7-2018 referencing MIT code and adafruit library )
-#define pixelSizeDivide 4        
+#define pixelSizeDivide 4       
 
 int interpolateSampleDir =1;// this is direction of sample 0->right sample 1-> left sample (for end of display values to be averaged better)   
 int offset=0;
@@ -259,8 +259,8 @@ for (int raster_x=0;raster_x !=(pixelSizeDivide*interpolateSampleDir)  ;raster_x
     for (int raster_y=0;raster_y != (pixelSizeDivide*interpolateSampleDir) ;raster_y += 1*interpolateSampleDir){ //0,1  
 //we keep sample size from nieghbor pixels even when sample divides increase
 byte  tempcolor= map(pixels[(i+(raster_y/(pixelSizeDivide/2)))+(j+(raster_x/(pixelSizeDivide/2)))*8], MINTEMP, MAXTEMP, 0, 255);//we constrain color after subsampling
-
-tempcolor=((tempcolor*(pixelSizeDivide-raster_y)+ colorIndex*raster_y)/pixelSizeDivide+(tempcolor*(raster_x)+ colorIndex*(pixelSizeDivide-raster_x))/pixelSizeDivide)/2;//subsample with real pixel and surounding pixels
+//next line changes the average of the color between the main pixel and the sub pixels
+tempcolor=(( colorIndex*(pixelSizeDivide-raster_y)+ colorIndex*raster_y)/pixelSizeDivide+(tempcolor*(raster_x)+tempcolor*(pixelSizeDivide-raster_x))/pixelSizeDivide)/2;//subsample with real pixel and surounding pixels
 //tempcolor=(tempcolor+ colorIndex)/2;//subsample with real pixel and surounding pixels
 
 tempcolor=constrain(tempcolor,0,255);//subsample with real pixel and surounding pixels
@@ -277,7 +277,7 @@ displayPixelHeight/pixelSizeDivide,//we divide hieght of pixels.
 //would it make sense to subdivide to color of pixel directly? yes except camcolors is set with colors translated for heat.
 //maybe this part can be improved in future.
 //***^^^^place pixels^^^^*********   
-
+//delay(50);
    }//interpolatepixel_y 
 }//interpolatepixel_x    
 
