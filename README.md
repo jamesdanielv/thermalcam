@@ -4,7 +4,7 @@
 
 this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries.
 
-since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved drastivally.
+since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved.
 
 memory usage from aruino ide:
 Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes.
