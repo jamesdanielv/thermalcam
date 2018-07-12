@@ -15,5 +15,11 @@ faster more memory efficient way of thermal cam imaging //this library does foll
 
 a few things: only code changed is in thermal_cam.ino. further work needs to be done to amg88xx.h file to reduce noise color table needs to be updated with more resolution detail for higher resolution modes 32x32 interpolation is a work in progress.
 to change resolution look for interpolatemode at top of page. change it to 1,2, or 3
+
 to optimize work flow change optimize at top of page 0,1,2. 0 is no optimizations, 1 is cached pixles, 2 is bandwidth buffer prioritization with redundant pixel updates (so screen clears faster)
-if optimize is set to 2, then change: #define speedUpCompression 8, to a lower or higher number, lower than 8 is not recommended, and above 63 does little to nothing since there are only 64 pixels of data being sub sampled
+
+if optimize is set to 2, then change: #define speedUpCompression 8, 
+to a lower or higher number, lower than 8 is not recommended, 
+and above 63 does little to nothing since there are only 64 pixels of data being sub sampled
+
+
