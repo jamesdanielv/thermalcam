@@ -1,4 +1,3 @@
-
 //this is better with included zip package that has all needed libraries in it for testing. 
 //this is a work in process. 16x16 subsample seems to work ok, trying to verify 32x32 and add up to 512 by 512
 //some changes may be needed to have includes location changes also spixx.h just uses libray in file change back to <spi.h>
@@ -40,9 +39,9 @@
 
 
 // 0 no optimse |1 pixels only written whe color changed| 2 pixels also optimized for most changed ones first (deals with noise issues)
-#define optimize 2
+#define optimize 0
 
-#define interpolatemode 1 //can be 0-2,4,8,16,32,64,128,256,512, 0--> 8x8 resolution,  1--> 16x16 resolution -->512x512 (higher resolution needs more color detail to be tested. 
+#define interpolatemode 2 //can be 0-2,4,8,16,32,64,128,256,512, 0--> 8x8 resolution,  1--> 16x16 resolution -->512x512 (higher resolution needs more color detail to be tested. 
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
 const PROGMEM uint16_t camColors[] =  {0x480F,
@@ -245,23 +244,23 @@ displayPixelHeight/pixelSizeDivide,//we divide hieght of pixels.
 
 #if interpolatemode >1
 //how it updates when more than 2x2 sub pixels
-int pixelSizeDivide= 2*interpolatemode ; 
-//[0][4][8][c] or [0][2]
+int pixelSizeDivide= 2;//*interpolatemode ; 
+//[0][4][8][c] or [0][2] //order reverses depending on sample interpolateSampleDir 
 //[1][5][9][d]    [1][3]
 //[2][6][a][e]
 //[3][7][b][f]
   //fast subdivide low memory pixel enhancing code (by James Villeneuve 7-2018 referencing MIT code and adafruit library )
      
-
-int interpolateSampleDir =1;// this is direction of sample 0->right sample 1-> left sample (for end of display values to be averaged better)   
+int interpolatesampledir2=1; if(i<4){interpolatesampledir2=1;}else{interpolatesampledir2=-1;}//top(1) or bottom quadrunt (-1)
+int interpolateSampleDir =1;// left  (1) or right quadrunt (-1)
 int offset=0;
 if (j<4){interpolateSampleDir =1;}// we process left to right here . we need to change this so it scales with display resolution
          else{interpolateSampleDir =-1;offset=displayPixelHeight-displayPixelHeight/pixelSizeDivide;}//if past half way on display we sample in other direction
  //long timecount=micros();
 for (int raster_x=0;raster_x !=(pixelSizeDivide*interpolateSampleDir)  ;raster_x += 1*interpolateSampleDir){ //done with != instead of <> so i could invert direction ;)
-    for (int raster_y=0;raster_y != (pixelSizeDivide*interpolateSampleDir) ;raster_y += 1*interpolateSampleDir){ //0,1  
+    for (int raster_y=0;raster_y != (pixelSizeDivide* interpolateSampleDir) ;raster_y += 1* interpolateSampleDir){ //0,1  
 //we keep sample size from nieghbor pixels even when sample divides increase
-int  tempcolor= map(pixels[(i+(raster_y/(pixelSizeDivide/2)))+(j+(raster_x/(pixelSizeDivide/2)))*8], MINTEMP, MAXTEMP, 0, 255);//we constrain color after subsampling
+int  tempcolor= map(pixels[(i+(interpolatesampledir2+raster_y/(pixelSizeDivide/2)))+(j+(raster_x/(pixelSizeDivide/2)))*8], MINTEMP, MAXTEMP, 0, 255);//we constrain color after subsampling
 //next line changes the average of the color between the main pixel and the sub pixels
 tempcolor=(( tempcolor*(pixelSizeDivide-raster_y)+ colorIndex*raster_y)/pixelSizeDivide+(tempcolor*(raster_x)+colorIndex*(pixelSizeDivide-raster_x))/pixelSizeDivide)/2;//subsample with real pixel and surounding pixels
 //tempcolor=(tempcolor+ colorIndex)/2;//subsample with real pixel and surounding pixels
