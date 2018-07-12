@@ -39,9 +39,9 @@
 
 
 // 0 no optimse |1 pixels only written whe color changed| 2 pixels also optimized for most changed ones first (deals with noise issues)
-#define optimize 0
+#define optimize 2
 
-#define interpolatemode 2 //can be 0-2,4,8,16,32,64,128,256,512, 0--> 8x8 resolution,  1--> 16x16 resolution -->512x512 (higher resolution needs more color detail to be tested. 
+#define interpolatemode 1 //can be 0-2,4,8,16,32,64,128,256,512, 0--> 8x8 resolution,  1--> 16x16 resolution -->512x512 (higher resolution needs more color detail to be tested. 
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
 const PROGMEM uint16_t camColors[] =  {0x480F,
@@ -195,56 +195,10 @@ if (i+j*8 !=(i+j*8)|runagain)    compressionnumber++;// we only count priority p
 #endif    
 
 
-#if interpolatemode == 0
-   //this is original for display code pixel placement
-    tft.fillRect(displayPixelWidth *j, displayPixelHeight * i,displayPixelWidth, displayPixelHeight,(uint16_t)pgm_read_word_near(camColors+colorIndex));
-#endif
 
-
-#if interpolatemode == 1
-
-  //fast subdivide low memory pixel enhancing code (by James Villeneuve 7-2018 referencing MIT code and adafruit library )
-int pixelSizeDivide= 2 ;       
-
-int interpolateSampleDir =1;// this is direction of sample 0->right sample 1-> left sample (for end of display values to be averaged better)   
-int offset=0;
-if (j<4){interpolateSampleDir =1;}// we process left to right here . we need to change this so it scales with display resolution
-         else{interpolateSampleDir =-1;offset=displayPixelHeight/pixelSizeDivide;}//if past half way on display we sample in other direction
- //long timecount=micros();
-for (int raster_x=0;raster_x !=(pixelSizeDivide*interpolateSampleDir)  ;raster_x += 1*interpolateSampleDir){ //done with != instead of <> so i could invert direction ;)
-    for (int raster_y=0;raster_y != (pixelSizeDivide*interpolateSampleDir) ;raster_y += 1*interpolateSampleDir){ //0,1  
-
-int  tempcolor= map(pixels[(i+raster_y)+(j+raster_x)*8], MINTEMP, MAXTEMP, 0, 255);//we constrain color after subsampling
-
-tempcolor=(tempcolor+ colorIndex)/2;//subsample with real pixel and surounding pixels
-tempcolor=constrain(tempcolor,0,255);//subsample with real pixel and surounding pixels
-
-//formated line below for easier reading
-//*******place pixels*************
- 
-tft.fillRect(displayPixelWidth *j
-+offset+ (interpolateSampleDir*displayPixelWidth/pixelSizeDivide)*(raster_x*interpolateSampleDir), //we reduce pixle size and step over in raster extra pixels created
-displayPixelHeight* i+offset+(interpolateSampleDir*displayPixelHeight/pixelSizeDivide)*(raster_y*interpolateSampleDir),
-displayPixelWidth/pixelSizeDivide,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
-displayPixelHeight/pixelSizeDivide,//we divide hieght of pixels.
-(uint16_t)pgm_read_word_near(camColors+tempcolor));  //we update pixel location with new subsampled pixel.
-//would it make sense to subdivide to color of pixel directly? yes except camcolors is set with colors translated for heat.
-//maybe this part can be improved in future.
-//***^^^^place pixels^^^^*********   
-
-   }//interpolatepixel_y 
-}//interpolatepixel_x    
-
-
-
-
-
-#endif
-
-
-#if interpolatemode >1
+#if interpolatemode >0
 //how it updates when more than 2x2 sub pixels
-int pixelSizeDivide= 2;//*interpolatemode ; 
+int pixelSizeDivide= 2*interpolatemode ; 
 //[0][4][8][c] or [0][2] //order reverses depending on sample interpolateSampleDir 
 //[1][5][9][d]    [1][3]
 //[2][6][a][e]
