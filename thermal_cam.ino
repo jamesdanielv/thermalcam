@@ -21,7 +21,7 @@
 
 #include "Adafruit_GFX.h"    // Core graphics library
 #include "Adafruit_ST7735.h" // Hardware-specific library
-#include "SPIxx.h"
+#include "SPIxx.h" //built in library should be SPI.h 
 
 #include <Wire.h>
 #include "Adafruit_AMG88xx.h"
