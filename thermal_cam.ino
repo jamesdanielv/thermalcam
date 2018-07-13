@@ -195,6 +195,13 @@ if (i+j*8 !=(i+j*8)|runagain)    compressionnumber++;// we only count priority p
 #endif    
 
 
+#if interpolatemode == 0
+   //this is original for display code pixel placement
+    tft.fillRect(displayPixelWidth *j, displayPixelHeight * i,displayPixelWidth, displayPixelHeight,(uint16_t)pgm_read_word_near(camColors+colorIndex));
+#endif
+
+
+
 
 #if interpolatemode >0
 //how it updates when more than 2x2 sub pixels
