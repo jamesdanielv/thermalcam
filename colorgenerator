@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+  Page created by james villeneve<br>
+This page adjusts color by changing gradient fills between colors. information about false coloring can be obtained by 
+searching wikipedia on thermcal cam and false color image.<br>
+ with reference here https://www.w3schools.com/tags/canvas_getimagedata.asp [color map can store up to range of 1024 colors]
+<br>
+this is a work in progress, for example you still need to hardcode range and remove the "," from the end of data, and add a ;
+to insert it as data for arduino progmem table
+<br>
+<canvas id="myCanvas" width="1424" height="300" style="border:1px solid #d3d3d3;">
+
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<br>
+
+enter old color data, it is processed as 16bit of 4 hex values. and converted from 565 to 888rgb for tests. this code assumes up to 1024 values in
+<br>
+<form>
+<textarea id='colorSets' name='colorSets'border='1' cols='80' rows="20">enter hex data here make sure it has commas "," also only data not ignored is 0-F and comma.</textarea>
+<textarea id='colorSets2' name='colorSets2' border='1' cols='80' rows="20"> results will post here tp put into new table</textarea>
+<br>
+ 
+  range <input type="input" id="range" name="range" vale="64" />numeric just greater than 1<br>
+<input type="submit"  >
+</form>
+<script>
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+function heatMapColorforValue(value){
+  var h = (1.0 - value) * 240
+  return "hsl(" + h + ", 100%, 50%)";
+}
+
+function rgbToHex(r, g, b) {
+    if (r > 255 || g > 255 || b > 255)
+        throw "Invalid color component";
+    return ((r << 16) | (g << 8) | b).toString(16);
+}
+
+function copy()
+{
+var imgData=ctx.getImageData(10,10,50,50);
+ctx.putImageData(imgData,10,70);
+}
+
+function decimalToHex(d, padding) {
+    var hex = Number(d).toString(16);
+    padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+    while (hex.length < padding) {
+        hex = "0" + hex;
+    }
+
+    return hex;
+}
+//we want to store data from textbox area
+
+document.getElementById('colorSets').innerHTML=getParameterByName('colorSets');
+
+
+var oldColorRaw=getParameterByName('colorSets');
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+var hexinfo="000000"
+var range =document.getElementById('range').innerHTML.value;//we get the range for setting color map. it can be as high as 1024
+
+//we get old color table values to compare color data
+var dataOldColor= new Array(1024);//we get old color data of 256 words of color information
+var numberinarray=0;//used for converting to colors
+//for (n=0;n<oldColorRaw.length;n++){//we look at all of left table and extra 565 convert to 24bit and put on screen
+//if (oldColorRaw.substring(i)="x"){}
+
+//ctx2.font="20px Georgia";
+//ctx2.fillText("[signtime="+signtime+"]",0,210);
+
+//}
+
+// Create gradient
+var grd = ctx.createLinearGradient(0,0,1324,0);
+//we show gradience of 6 colors 1/6=
+grd.addColorStop(0,"black");//0.1666
+grd.addColorStop(0.1666*1,"blue");
+grd.addColorStop(0.1666*2,"green");
+grd.addColorStop(0.1666*3,"yellow");
+grd.addColorStop(0.1666*4,"orange");
+grd.addColorStop(0.1666*5,"red");
+// Fill with gradient
+
+
+ctx.fillStyle = grd;
+ctx.fillRect(1,10,1450,80);
+
+//data=0;
+var imgData = ctx.getImageData(0, 0, 1024, 210);
+ //var imgData=ctx.getImageData(1, 1, 1024, 100).data  //'rgb(0,'+Math.floor(i)+','+Math.floor(i)+')';
+ var red,green,blue;
+var temp=0;
+
+//color table to make color change less and interpolation more meaningful
+
+document.getElementById('colorSets2').innerHTML="{";//start for data .toString(16) makes data hex
+for (  i=0;i<256;i++){
+  for (  j=0;j<4;j++){
+  
+ //if (temp>Math.round1024/ range){temp=0;}
+	ctx.beginPath();
+
+var imgData = ctx.getImageData(i*4+j+25, 10,2, 2);
+ 
+
+
+red = imgData.data[0];
+green = imgData.data[1];
+blue = imgData.data[2];
+ctx.moveTo(i*4+j, 200);
+ctx.lineTo(i*4+j, 280);
+
+ctx.strokeStyle ='rgb('+Math.floor(red&248)+','+Math.floor(green&252)+','+Math.floor(blue&248)+')';
+//ctx.strokeStyle ='rgb(0,0,255)';
+
+//'rgb('+Math.floor(red/16)+','+Math.floor(green/8)+','+Math.floor(blue/16)+') ';
+
+//getPixelXY(temp,i,50)
+
+ctx.stroke();
+}
+
+//document.getElementById('colorSets2').innerHTML+='rgb('+Math.floor(red&248)+','+Math.floor(green&252)+','+Math.floor(blue&248)+')';
+hexinfo=(Math.floor(red/8)*2048+Math.floor(green/4)*32+Math.floor(blue/8)).toString(16)+',';
+
+while (hexinfo.length<5){hexinfo='0'+hexinfo;} //this adds leading zeros
+document.getElementById('colorSets2').innerHTML+='0x'+hexinfo;
+temp++;
+if (temp>6){document.getElementById('colorSets2').innerHTML+= String.fromCharCode(13);temp=0;}
+}
+document.getElementById('colorSets2').innerHTML+="}";//start for data .toString(16) makes data hex
+//this part simulates actual chart data
+
+for (  i=0;i<64;i++){
+ for (j=0;j<16;j++){
+  
+ //if (temp>Math.round1024/ range){temp=0;}
+  ctx.beginPath();
+
+var imgData = ctx.getImageData(i*16, 10,2, 2);
+ 
+
+if (j==0){
+red = imgData.data[0];
+green = imgData.data[1];
+blue = imgData.data[2];
+}
+
+ctx.moveTo(i*16+j, 100);
+ctx.lineTo(i*16+j, 180);
+
+ 
+ctx.strokeStyle ='rgb('+Math.floor(red&248)+','+Math.floor(green&252)+','+Math.floor(blue&248)+')';
+//getPixelXY(temp,i,50)
+
+ctx.stroke();
+}
+}
+//copy();
+</script>
+
+</body>
+</html>
