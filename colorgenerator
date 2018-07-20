@@ -4,7 +4,7 @@
 <body>
   <script>
 
-//this page is made by james villenueve 
+//this page is maed by james villenueve 
 // code is free to distribute and is as is with no warranties
 //some software may come alive and take over things, use at your own risk
 //do not reproduce or use parts of code without proper credit to authors
@@ -28,10 +28,13 @@ data her it is processed as 16bit of 4 hex values. and converted from 565 to 888
 <br>
 <form>
 
-<textarea id='colorSets2' name='colorSets2' border='1' cols='80' rows="20"> results will post here tp put into new table</textarea>
+<textarea id='colorSets2' name='colorSets2' border='1' cols='160' rows="20"> results will post here tp put into new table</textarea>
 <br>
    startsamplingat<input type="input" id="startsamplingat" name="startsamplingat" vale="200" />numeric 0 ~200, if to high we go past canvas<br>
-  range <input type="input" id="range" name="range" vale="64" />numeric just greater than 1 and no more than 1023<br>
+  range <input type="input" id="range" name="range" vale="64" />numeric just greater than 1 and no more than 1024<br>
+   repeat values <input type="input" id="repeat" name="repeat" vale="1" />this is normally 1<br>
+ across values in table <input type="input" id="across" name="across" vale="1" />this is set to 6, but can be as wide as you want. it is for looks only<br>
+
 <input type="submit"  >
 </form>
 <script>
@@ -87,10 +90,25 @@ function decimalToHex(d, padding) {
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 var hexinfo="000000"
-
+var start
 //here is where we read value for data input
-var range =document.getElementById('range').value;//we get the range for setting color map. it can be as high as 1024
+document.getElementById('across').value=getParameterByName('across');
+document.getElementById('repeat').value=getParameterByName('repeat');
+if (document.getElementById('repeat').value==''){document.getElementById('repeat').value=1;}
+if (document.getElementById('across').value==''){document.getElementById('across').value=6;}
 document.getElementById('range').value=getParameterByName('range');//we want number to stay after refresh
+
+var  repeat= getParameterByName('repeat'); 
+var range =document.getElementById('range');//we get the range for setting color map. it can be as high as 1024
+var across=getParameterByName('across');//to know how wide table is to be with values
+if (document.getElementById('across').value==''){across=6;}
+if (document.getElementById('range').value==''){document.getElementById('range').value=64;}//we want number to stay after refresh
+if (getParameterByName('range') <0 | getParameterByName('range') >1023){document.getElementById('range').value=64;}
+var range =document.getElementById('range');//we get the range for setting color map. it can be as high as 1024
+document.getElementById('startsamplingat').value=getParameterByName('startsamplingat');//we want number to stay after refresh
+if (document.getElementById('startsamplingat').value==''){document.getElementById('startsamplingat').value=25;}//we give default value
+if (getParameterByName('startsamplingat')>200){document.getElementById('startsamplingat').value=200;}
+var startsamplingat=getParameterByName('startsamplingat');
 //we get old color table values to compare color data
 var dataOldColor= new Array(1024);//we get old color data of 256 words of color information
 var numberinarray=0;//used for converting to colors
@@ -128,23 +146,24 @@ var imgData = ctx.getImageData(0, 0, 1024, 210);
 var temp=0;
 
 //color table to make color change less and interpolation more meaningful
-
+range=getParameterByName('range');//we convert to make sure it is numeric
 document.getElementById('colorSets2').innerHTML="{";//start for data .toString(16) makes data hex
-for (  i=0;i<1024;i++){
-  //for (  j=0;j<4;j++){
+for (  i=0;i<range;i++){
+  for (  j=0;j<1024/range;j++){
   
  //if (temp>Math.round1024/ range){temp=0;}
 	ctx.beginPath();
 
-var imgData = ctx.getImageData(i+25, 10,2, 2);
+var imgData = ctx.getImageData(i*(1024/range)+j+Math.floor(startsamplingat), 10,2, 2);
  
-
+if (j==0){
 
 red = imgData.data[0];
 green = imgData.data[1];
 blue = imgData.data[2];
-ctx.moveTo(i, 200);
-ctx.lineTo(i, 280);
+}
+ctx.moveTo(i*(1024/range)+j, 200);
+ctx.lineTo(i*(1024/range)+j, 280);
 
 ctx.strokeStyle ='rgb('+Math.floor(red&248)+','+Math.floor(green&252)+','+Math.floor(blue&248)+')';
 //ctx.strokeStyle ='rgb(0,0,255)';
@@ -154,21 +173,24 @@ ctx.strokeStyle ='rgb('+Math.floor(red&248)+','+Math.floor(green&252)+','+Math.f
 //getPixelXY(temp,i,50)
 
 ctx.stroke();
-//}
-
+}//j
+var temprepeat=repeat;//if we are repeating data we have this to do it
+while (temprepeat>0){ temprepeat--;
 //document.getElementById('colorSets2').innerHTML+='rgb('+Math.floor(red&248)+','+Math.floor(green&252)+','+Math.floor(blue&248)+')';
 hexinfo=(Math.floor(red/8)*2048+Math.floor(green/4)*32+Math.floor(blue/8)).toString(16)+',';
 
 while (hexinfo.length<5){hexinfo='0'+hexinfo;} //this adds leading zeros
 document.getElementById('colorSets2').innerHTML+='0x'+hexinfo;
 temp++;
-if (temp>6){document.getElementById('colorSets2').innerHTML+= String.fromCharCode(13);temp=0;} //we ad a return to make things go to next line to be nice
+}
+
+if (temp>across){document.getElementById('colorSets2').innerHTML+= String.fromCharCode(13);temp=0;} //we ad a return to make things go to next line to be nice
 }
 
 //this is at end of loop, all values in table text area, now we need to clean up last comment and close loop 
 var temptable=document.getElementById('colorSets2').innerHTML
 document.getElementById('colorSets2').innerHTML=temptable.substring(0,temptable.length-1);//we remove last coma
-document.getElementById('colorSets2').innerHTML+="};"+"range"+getParameterByName('range');//we want number to stay after refresh;//start for data .toString(16) makes data hex
+document.getElementById('colorSets2').innerHTML+="};";//we want number to stay after refresh;//start for data .toString(16) makes data hex
 //this part simulates actual chart data
 
 for (  i=0;i<64;i++){
@@ -177,7 +199,7 @@ for (  i=0;i<64;i++){
  //if (temp>Math.round1024/ range){temp=0;}
   ctx.beginPath();
 
-var imgData = ctx.getImageData(i*16, 10,2, 2);
+var imgData = ctx.getImageData(i*16+Math.floor(startsamplingat), 10,2, 2);
  
 
 if (j==0){
@@ -202,7 +224,12 @@ ctx.font="20px Georgia";
 ctx.fillStyle = '#000000';
 ctx.fillText("[64 color detail ref.]",800,150);
 ctx.fillText("<--[16 bit color, and info is in tables below]",1030,250);
-ctx.fillStyle = grd;
+ctx.fillText("          (these are output colors)",1030,270);
+ctx.moveTo(startsamplingat, 0);
+ctx.lineTo(startsamplingat, 100);
+ctx.strokeStyle= '#000000';
+ctx.stroke();
+
 </script>
 
 </body>
