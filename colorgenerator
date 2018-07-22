@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <body>
@@ -103,7 +102,7 @@ var range =document.getElementById('range');//we get the range for setting color
 var across=getParameterByName('across');//to know how wide table is to be with values
 if (document.getElementById('across').value==''){across=6;}
 if (document.getElementById('range').value==''){document.getElementById('range').value=64;}//we want number to stay after refresh
-if (getParameterByName('range') <0 | getParameterByName('range') >1023){document.getElementById('range').value=64;}
+if (getParameterByName('range') <0 | getParameterByName('range') >1024){document.getElementById('range').value=64;}
 var range =document.getElementById('range');//we get the range for setting color map. it can be as high as 1024
 document.getElementById('startsamplingat').value=getParameterByName('startsamplingat');//we want number to stay after refresh
 if (document.getElementById('startsamplingat').value==''){document.getElementById('startsamplingat').value=25;}//we give default value
@@ -152,7 +151,7 @@ for (  i=0;i<range;i++){
   for (  j=0;j<1024/range;j++){
   
  //if (temp>Math.round1024/ range){temp=0;}
-	ctx.beginPath();
+  ctx.beginPath();
 
 var imgData = ctx.getImageData(i*(1024/range)+j+Math.floor(startsamplingat), 10,2, 2);
  
