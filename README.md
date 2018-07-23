@@ -1,14 +1,17 @@
 //this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
-color generator file should be downloaded and opened in a browser. as of 7/16/18 color values are hard coded and can be changed in code. at some date in future i plan on adding those features into gui. 
+color generator file should be downloaded and opened in a browser. as of 7/22/18 most features can be changes from web page gui.
 
-this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries.
+this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries, except for st77xx librarys which run slower than the extra ones i include in main directory.
 since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved.
+
+there also is an alternate library for st77xx, this includes a fillRectFast, in place of fillRect. this command includes a method of bursting spi, so while spi data being sent, other data is loaded, this way spi is always busy, even at fastest clock speed of 8mhz.
+
 
 memory usage from arduino ide: Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes. Global variables use 927 bytes (45%) of dynamic memory, leaving 1,121 bytes for local variables. Maximum is 2,048 bytes.
 faster more memory efficient way of thermal cam imaging //this library does following
 
-1. moves color translate tables to progmem freeing 512 bytes
+1. moves color translate tables to progmem freeing 512 bytes, or allows alternate color tabes with more values
 2. incorporates a buffer for temp reads so we only update areas on screen that change
 3. adds bandwidth compression so most critical areas get updated first if cpu limited, or lcd slow
 4. implements 3 sample interpolation (3 sample makes sub samples) without need for a scaled buffer
