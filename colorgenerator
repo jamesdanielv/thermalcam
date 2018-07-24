@@ -7,7 +7,7 @@
 // code is free to distribute and is as is with no warranties
 //some software may come alive and take over things, use at your own risk
 //do not reproduce or use parts of code without proper credit to authors
-
+// some of the functions are from the https://www.w3schools.com forum.
 //this code basically creates a usable color array to be indexed by other programs. output should be cut and paste 
 //for example in my case to arduino thermal camera
 </script>
