@@ -41,7 +41,7 @@ data her it is processed as 16bit of 4 hex values. and converted from to 888rgb 
    repeat values <input type="input" id="repeat" name="repeat" vale="1" />this is normally 1<br>
  across values in table <input type="input" id="across" name="across" vale="1" />this is set to 6, but can be as wide as you want. it is for looks only<br>
 
-<input type="submit"  >
+<input type="submit"  >(may need to press submit a few times for autofill features. this is a current bug, sorry)
 </form>
 <script>
 //values that can chane
@@ -108,7 +108,7 @@ if (getParameterByName('color1').length<1){document.getElementById('color1').val
 if (getParameterByName('color2').length<1){document.getElementById('color2').value="#4488f0";};var color2=document.getElementById('color2').value;
 if (getParameterByName('color3').length<1){document.getElementById('color3').value="#44ff44";};var color3=document.getElementById('color3').value;
 if (getParameterByName('color4').length<1){document.getElementById('color4').value="#F0F000";};var color4=document.getElementById('color4').value;
-if (getParameterByName('color5').length<1){document.getElementById('color5').value="#ffa544";};var color5=document.getElementById('color5').value;
+if (getParameterByName('color5').length<1){document.getElementById('color5').value="#f0a544";};var color5=document.getElementById('color5').value;
 if (getParameterByName('color6').length<1){document.getElementById('color6').value="#ff4040";};var color6=document.getElementById('color6').value;
 //here is where we read value for data input
 document.getElementById('across').value=getParameterByName('across');
