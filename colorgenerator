@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <body>
@@ -30,7 +31,7 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 
 <br>
 
-data her it is processed as 16bit of 4 hex values. and converted from to 888rgb to 565  for tests. this code assumes up to 1024. it can be cut and pasted into arudino
+data here is processed as 16bit of 4 hex values. and converted from to 888rgb to 565  for tests. this code assumes up to 1024. it can be cut and pasted into arudino
 <br>
 
 
@@ -253,3 +254,4 @@ ctx.stroke();
 
 </body>
 </html>
+
