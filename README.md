@@ -15,10 +15,10 @@ faster more memory efficient way of thermal cam imaging //this library does foll
 2. incorporates a buffer for temp reads so we only update areas on screen that change
 3. adds bandwidth compression so most critical areas get updated first if cpu limited, or lcd slow
 4. implements 3 sample interpolation (3 sample makes sub samples) without need for a scaled buffer
-5. we have 8x8 , 16x16, 32x32 sub sampling real time on arduino using spi display.
+5. we have 8x8 , 16x16, 32x32 (32x32 is experimental) sub sampling real time on arduino using spi display.
 
 
-a few things: only code changed is in thermal_cam.ino. further work needs to be done to amg88xx.h file to reduce noise color table needs to be updated with more resolution detail for higher resolution modes 32x32 interpolation is a work in progress.
+a few things:it should function if export thermal_cam.ino to adafruit thermal example, however it will be slower as spi is not properly managed in there library for data bursts. further work needs to be done to amg88xx.h file to reduce noise color table needs to be updated with more resolution detail for higher resolution modes 32x32 interpolation is a work in progress.
 to change resolution look for interpolatemode at top of page. change it to 1,2, or 3
 
 to optimize work flow change optimize at top of page 0,1,2. 0 is no optimizations, 1 is cached pixles, 2 is bandwidth buffer prioritization with redundant pixel updates (so screen clears faster)
