@@ -327,6 +327,8 @@ if (i>7){i=0;k++;}//here we run code that makes sense of supersubsamples, sample
 #if optimize >0 
 
 if (colorIndex !=pixelsbuf[i+j*8]){
+  //if different then we replace data in buffer, then do stuff to put it on screen
+  pixelsbuf[i+j*8]=colorIndex;//added this back in 8/1/18 took out by mistake
 #endif
 #if optimize >1   
 if (i+j*8 !=(i+j*8)|runagain)    compressionnumber++;// we only count priority pixels, not ones with slower refresh
