@@ -24,7 +24,7 @@ as well as Adafruit raw 1.8" TFT display
 #define TFT_RST    9  // you can also connect this to the Arduino reset
                       // in which case, set this #define pin to 0!
 #define TFT_DC     8
-#include "fastio.h"
+#include "digitalfastwrite.h"
 #include "Adafruit_ST77xx.h"
 #include <limits.h>
 #ifndef ARDUINO_STM32_FEATHER
@@ -449,7 +449,7 @@ void Adafruit_ST77xx::fillRectFast(int16_t x, int16_t y, int16_t w, int16_t h,
 
 //  y=h;
  
-    x=w*h;// most ot time is in pixel writes. a dealy is needed for spi to write data
+    x=w*h;// most of time is in pixel writes. a dealy is needed for spi to write data
 
     
    //   spiwrite(hi);//we update color
@@ -459,7 +459,9 @@ void Adafruit_ST77xx::fillRectFast(int16_t x, int16_t y, int16_t w, int16_t h,
  //SPCR = SPCRbackup;  //we place at top for next loop iteration
  SPCRbackup = SPCR; //not sure what this does or if it is really needed, but we keep at begining of loop unroll
       SPCR = mySPCR;
-      SPI.transfer(hi);
+       
+      SPDR = hi;
+      __asm__("nop\n\t"); 
       __asm__("nop\n\t"); //delayed for fast spi not to need another loop
       __asm__("nop\n\t"); 
       __asm__("nop\n\t"); 
@@ -480,9 +482,11 @@ void Adafruit_ST77xx::fillRectFast(int16_t x, int16_t y, int16_t w, int16_t h,
 
     // SPCRbackup = SPCR;
       SPCR = mySPCR;
-      SPI.transfer(lo);
+      // __asm__("nop\n\t"); 
+      SPDR =lo;
+      
      __asm__("nop\n\t"); 
-      if (x==0){ return;}//shave time off of negating zero
+      if (x==1){ return;}//shave time off of negating zero
           __asm__("nop\n\t"); 
            __asm__("nop\n\t"); 
            x--;
