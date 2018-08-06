@@ -1,9 +1,6 @@
 //this is better with included zip package that has all needed libraries in it for testing.
 //most updated version of thermal_cam file can replace the one in zip file
-//also adafruit_AMG88xx.ccp included file contains noise filtering that averages more when change is small
-//better performance by using my st77xx.ccp file and st77xx.h files, including spi bursting, and 4 rectange writes at time
-//this is a work in process. 16x16 subsample seems to work ok, trying to verify 32x32 and add up to 512 by 512 eventually
-//32 x32 uses a buffer but this is wont be perminent, it just helped me understand sub sample of sub sample
+//this is a work in process. 16x16 subsample seems to work ok, trying to verify 32x32 and add up to 512 by 512
 //some changes may be needed to have includes location changes also spixx.h just uses libray in file change back to <spi.h>
 //this is the only file where code changes are, so just replace old file with this one 
 //and change libary include file locations
@@ -47,11 +44,11 @@
 // 0 no optimse |1 pixels only written whe color changed| 2 pixels also optimized for most changed ones first (deals with noise issues)
 #define optimize  2
 
-#define interpolatemode 2 //can be 0-2 so far 0=8x8 1=16x16 2=32x32 
+#define interpolatemode 2 //can be 0-2 so far 0=8x8 1=16x16 2=32x32 only try 64x64 on atmega or greater. needs at least 4k of ram for those systems for now 
 //noise filter should not be very high if setting filter for amg8833, look in Adafruit_AMG88xx.cpp, buf[i] to change to old method if wanting.
 #define noisefilter 10 //0 is off.  this means temp variation needs to be greater than this for data to be sent to lcd, also you could program interupt of amg8833 for this as well
-
-
+#define show_temp_readout true //this shows center dot, and right below the temp for that dot.
+#define temp_Fahrenhei true //we convert output temp to F, otherwise it is c
 
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
@@ -320,7 +317,10 @@ uint16_t postbuffer[AMG88xx_PIXEL_ARRAY_SIZE*4];//this is a temp buffer it wont 
 byte color4buf;//we use for drawing 4 at a time if enabled, just counts 0 to 3
 #endif
 
-
+#if interpolatemode >2 
+uint16_t postbuffer2[AMG88xx_PIXEL_ARRAY_SIZE*16];//this is a temp buffer it wont always be needed
+byte color4buf2;//we use for drawing several pixels at a time
+#endif
 
 
 //uint16_t displayPixelWidth, displayPixelHeight;
@@ -711,5 +711,28 @@ ix*8,
 }
 */
 #endif
+
+//this is last area before refresh
+#if show_temp_readout == true 
+
+#if temp_Fahrenhei == true
+//we convert to Fahrenheit!
+byte temperature= (pixels[8*4+4]*1.8+32+pixels[8*4+5]*1.8+32+pixels[8*3+4]*1.8+32+pixels[8*3+5]*1.8+32)/4;// we sample 4 samples because center of screen is 4 samples
+#else
+byte temperature= (pixels[8*4+4]+pixels[8*4+5]+pixels[8*3+4]+pixels[8*3+5])/4;// we sample 4 samples because center of screen is 4 samples
+#endif
+
+
+
+Serial.println(temperature);
+//we read from float buffer and convert to int, then convert to string output this method is ugly, just no reason to invest in better method.
+byte charplace1=temperature/10;//we have upper limit
+byte charplace2=temperature-charplace1*10;//we have upper limit
+tft.drawChar(64-10,64+5,48+charplace1,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
+tft.drawChar(64-10+5,64+5,48+charplace2,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
+tft.drawCircle(128/2,128/2,2,0xFFFF);
+tft.drawCircle(65,64+7,1,0xFFFF);
+#endif
+
 }
 
