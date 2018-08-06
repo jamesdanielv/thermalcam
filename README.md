@@ -1,7 +1,13 @@
 //this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
+I designed a method of sub sampling that does not use floats, it works currently to 32x32 with st77xx display and arduino.
+with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
+with little issue (not bad!)
+
+
 color generator file should be downloaded and opened in a browser. as of 7/22/18 most features can be changes from web page gui.
-for compatability with adafruit code, change #define spi_optimized_st77xx true to false, this allows standard libraries to be used with thermalcam.ino file.
+for compatability with adafruit code, change #define spi_optimized_st77xx true to false, this allows standard libraries to be used with thermalcam.ino file. if use the code in this folder and includeds st77xx.ccp and st77xx.h spi bursts will be 
+faster
 this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries, except for st77xx librarys which run slower than the extra ones i include in main directory.
 since display update is the most time intensive task (5000-7000 microseconds per pixel) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved.
 
