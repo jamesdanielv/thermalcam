@@ -490,6 +490,7 @@ void Adafruit_ST77xx::fillRectFast(int16_t x, int16_t y, int16_t w, int16_t h,
           __asm__("nop\n\t"); 
            __asm__("nop\n\t"); 
            x--;
+          
 //we are useing the jmp and loop call times to reduce the timing needed here.
 // since loop time is at the delay needed for spi, this is as efficient as it can be, as every clock
 //per color pixel draw for fill is flooded to spi!
@@ -502,6 +503,173 @@ void Adafruit_ST77xx::fillRectFast(int16_t x, int16_t y, int16_t w, int16_t h,
   SPI_END_TRANSACTION();
 }
 
+//below we have one that makes subsampling easier
+void Adafruit_ST77xx::fillRectFast4colors(int16_t x, int16_t y, int16_t w, int16_t h,
+  uint16_t color0,uint16_t color1,uint16_t color2,uint16_t color3) {
+//this is needed for text but not fills with solid color!
+  // rudimentary clipping (drawChar w/big text requires this)
+ // if((x >= _width) || (y >= _height)) return;
+ // if((x + w - 1) >= _width)  w = _width  - x;
+ // if((y + h - 1) >= _height) h = _height - y;
+
+  setAddrWindow(x, y, x+w-1, y+h-1);
+  //uses more memory, but i think it is more efficient
+  uint8_t hi0 = color0 >> 8, lo0 = color0;//we set this in advance, and we do the changes in between write cycles of spi! so no time lost!
+  uint8_t hi1 = color1 >> 8, lo1 = color1;//we set this in advance, and we do the changes in between write cycles of spi! so no time lost!
+  uint8_t hi2 = color2 >> 8, lo2 = color2;//we set this in advance, and we do the changes in between write cycles of spi! so no time lost!
+  uint8_t hi3 = color3 >> 8, lo3 = color3;//we set this in advance, and we do the changes in between write cycles of spi! so no time lost!  
+  SPI_BEGIN_TRANSACTION();
+
+  digitalWriteFast(TFT_DC,HIGH);// old DC_HIGH();
+  
+  digitalWriteFast(TFT_CS,LOW);// old CS_LOW();
+
+//  y=h;
+  uint16_t countx;//we use these to understand what to draw!
+  uint16_t county;
+  //
+
+  //  x=w*h;// most of time is in pixel writes. a dealy is needed for spi to write data
+    
+    
+   //   spiwrite(hi);//we update color
+   //   spiwrite(lo);
+//__attribute__((optimize("unroll-loops")));
+
+//first area
+ SPCR = SPCRbackup;  //we place at top for next loop iteration
+county=h/2;//+1;
+while (county !=0 ){
+         countx=w/2;
+          
+    while (countx !=0) {//we need to unroll this loop and add a command that cycles thru to push address one byte at a time.
+     
+
+     
+      SPCRbackup = SPCR; //not sure what this does or if it is really needed, but we keep at begining of loop unroll
+      SPCR = mySPCR;
+       
+      SPDR = hi0;
+    
+
+      __asm__("nop\n\t"); __asm__("nop\n\t");__asm__("nop\n\t"); __asm__("nop\n\t");  __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+      __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+
+     // while (!(SPSR & _BV(SPIF)));//left to show old way
+     
+      SPCRbackup = SPCR;
+      SPCR = mySPCR;
+      SPDR =lo0;
+
+       __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+           countx--;    
+    }//x
+
+    
+    //second area
+       countx=w/2;
+    while (countx !=0) {//we need to unroll this loop and add a command that cycles thru to push address one byte at a time.
+  
+      SPCR = SPCRbackup;  //we place at top for next loop iteration
+      SPCRbackup = SPCR; //not sure what this does or if it is really needed, but we keep at begining of loop unroll
+      SPCR = mySPCR;
+      SPDR = hi1;
+    
+
+      __asm__("nop\n\t"); __asm__("nop\n\t");__asm__("nop\n\t"); __asm__("nop\n\t");  __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+      __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+    
+    SPCR = mySPCR;
+    SPDR =lo1;
+      
+       __asm__("nop\n\t");// __asm__("nop\n\t"); __asm__("nop\n\t");
+ 
+           countx--;
+
+//we are useing the jmp and loop call times to reduce the timing needed here.
+// since loop time is at the delay needed for spi, this is as efficient as it can be, as every clock
+//per color pixel draw for fill is flooded to spi!
+
+       
+    }//x
+    county--;
+}//end of first half of rectange [0][1] drawn!
+
+
+county=h/2;//+1; 
+while (county !=0){
+     countx=w/2;//we need to reset countx here as well
+
+    while (countx !=0) {//we need to unroll this loop and add a command that cycles thru to push address one byte at a time.
+      
+    
+      SPCRbackup = SPCR; //not sure what this does or if it is really needed, but we keep at begining of loop unroll
+      SPCR = mySPCR;
+      
+      SPDR = hi2;
+    
+
+      __asm__("nop\n\t"); __asm__("nop\n\t");__asm__("nop\n\t"); __asm__("nop\n\t");  __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+      __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+
+      SPCRbackup = SPCR;
+      SPCR = mySPCR;
+
+      SPDR =lo2;
+      
+     __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+
+           countx--;
+
+//we are useing the jmp and loop call times to reduce the timing needed here.
+// since loop time is at the delay needed for spi, this is as efficient as it can be, as every clock
+//per color pixel draw for fill is flooded to spi!
+
+       
+    }//x
+
+
+  
+    countx=w/2;
+    //second area
+
+    while (countx !=0) {//we need to unroll this loop and add a command that cycles thru to push address one byte at a time.
+      
+
+      SPCRbackup = SPCR; //not sure what this does or if it is really needed, but we keep at begining of loop unroll
+      SPCR = mySPCR;
+      
+      SPDR = hi3;
+    
+
+      __asm__("nop\n\t"); __asm__("nop\n\t");__asm__("nop\n\t"); __asm__("nop\n\t");  __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+      __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t"); 
+
+      SPCRbackup = SPCR;
+      SPCR = mySPCR;
+      // __asm__("nop\n\t"); 
+      SPDR =lo3;
+      
+     __asm__("nop\n\t"); __asm__("nop\n\t"); __asm__("nop\n\t");
+         
+           countx--;
+
+//we are useing the jmp and loop call times to reduce the timing needed here.
+// since loop time is at the delay needed for spi, this is as efficient as it can be, as every clock
+//per color pixel draw for fill is flooded to spi!
+
+       
+    }//x
+    county--;
+}//end of first half of rectange [2][3] drawn!
+
+         
+
+    digitalWriteFast(TFT_DC,HIGH);// old DC_HIGH();
+ 
+  digitalWriteFast(TFT_CS,HIGH);//old CS_HIGH();
+  SPI_END_TRANSACTION();
+}
 
 // Pass 8-bit (each) R,G,B, get back 16-bit packed color
 uint16_t Adafruit_ST77xx::Color565(uint8_t r, uint8_t g, uint8_t b) {
