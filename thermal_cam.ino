@@ -46,16 +46,14 @@
 
 #define interpolatemode 2 //can be 0-2 so far 0=8x8 1=16x16 2=32x32 only try 64x64 on atmega or greater. needs at least 4k of ram for those systems for now 
 //noise filter should not be very high if setting filter for amg8833, look in Adafruit_AMG88xx.cpp, buf[i] to change to old method if wanting.
-#define noisefilter 10 //0 is off.  this means temp variation needs to be greater than this for data to be sent to lcd, also you could program interupt of amg8833 for this as well
+#define noisefilter 2 //0 is off.  this means temp variation needs to be greater than this for data to be sent to lcd, also you could program interupt of amg8833 for this as well
 #define show_temp_readout true //this shows center dot, and right below the temp for that dot.
 #define temp_Fahrenhei true //we convert output temp to F, otherwise it is c
-
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
-#define colorMode 2  //can be 0=64 color adafruit, 1=256 color map 0,1 use same 256 color table,2=1024 colors , just 0 has same value 4 times, experimental colorMode=3 is 24bit color, only if display supports it
+#define colorMode 2  //can be 0=64 color adafruit, 1=256 color map 0,1 use same 256 color table space,2=1024 colors , just 0 has same value 4 times, experimental colorMode=3 is 24bit color, only if display supports it
 #define spi_optimized_st77xx true  //false if using normal driver//these files are upaded and specific for this code needed st77xx,h, st77xx.cpp need downloaded from https://github.com/jamesdanielv/thermalcam/blob/master/colorgenerator
 #define subpixelcoloroptimized true //experimental this is for 32x32 sampling, instead of drawing seperate squares, we draw 4 at a time! requires custom st77xx.ccp, and st77xx.h files included in main folder
-
 
 #if spi_optimized_st77xx == true
 #define fillRectFast tft.fillRectFast
@@ -385,6 +383,7 @@ void subpixelcolor(int Pixelsample,int SidePixel,int BottomPixel,int BottomSideP
 byte slowupdate=0;//used to refesh different amounts, makes sure pixels update more timely. solves noisy pixels
 long timer=micros();//for timing
 void loop() {
+//this line below reads the sensor data
 amg.readPixels(pixels);
 
 
@@ -394,6 +393,7 @@ amg.readPixels(pixels);
 //long timer =micros();
 compressionnumber=0;// we reset each time thru
  slowupdate++;slowupdate=slowupdate&15; //we run this routing to update a few times0,1, maybe more later on
+ delay(100);
  while(k<8 ){ 
 switch(k){// this allows j to do interleaving of page, when updates are slower, and improvese results of compressed bandwitdh
 case 0: j=0; break;case 1: j=2; break;case 2: j=4; break;case 3: j=6; break;case 4: j=1; break;case 5: j=3; break;case 6: j=5; break;case 7: j=7; break;
@@ -421,12 +421,12 @@ timer=micros();//used for testing
   
   if (pixelsbuf[i+j*8] -colorIndex >noisefilter || colorIndex-pixelsbuf[i+j*8]>noisefilter){
 
-   if  ((pixelsbuf[i+j*8] -colorIndex)>compressionflux/2 ||(colorIndex-pixelsbuf[i+j*8]>compressionflux/2 ||i+j*8==(i+j*8)|slowupdate )){
+   if  ((pixelsbuf[i+j*8] -colorIndex)>compressionflux ||(colorIndex-pixelsbuf[i+j*8]>compressionflux ||i+j*8==(i+j*8)|slowupdate )){
 
 #endif
 
 #if noisefilter == 0
-    if  ((pixelsbuf[i+j*8] -colorIndex)>compressionflux/2 ||(colorIndex-pixelsbuf[i+j*8]>compressionflux/2 ||i+j*8==(i+j*8)|slowupdate )){//loop with no noise filter code
+    if  ((pixelsbuf[i+j*8] -colorIndex)>compressionflux ||(colorIndex-pixelsbuf[i+j*8]>compressionflux ||i+j*8==(i+j*8)|slowupdate )){//loop with no noise filter code
 #endif
     
     //slowupdate value just esuresallows non priority pixel areas to update as well besides noise
@@ -677,18 +677,13 @@ raster_yx +=  interpolateSampleDir;
 //Serial.println(timer);
 //we sample one time per frame 
 //4000 is just an upper limit i pulled out of thin air, more color space requires wider range
- if (compressionnumber>speedUpCompression){if (compressionflux<100) {compressionflux+=1;};
+ if (compressionnumber>speedUpCompression){if (compressionflux<50) {compressionflux+=1;};
  }//we increase range more slowly 
  else{
-  if (compressionflux>2){compressionflux-=1;}//else{if (compressionflux>0){compressionflux-=1;}}
+  if (compressionflux>0){compressionflux-=1;}//else{if (compressionflux>0){compressionflux-=1;}}
  }
 
- //we test again and if large difference we adjust quickly
-  if (compressionnumber>speedUpCompression+5){if (compressionflux<95) {compressionflux+=5;};
- }//we increase range more slowly 
- else{
-  if (compressionflux>5){compressionflux-=5;}//else{if (compressionflux>0){compressionflux-=1;}}
- }
+
 //Serial.println(compressionnumber);//for testing
 #if interpolatemode > 1
 //this code is for output of buffer to display it tests buffer to make sure it is working correctly. now it is!
@@ -717,21 +712,22 @@ ix*8,
 
 #if temp_Fahrenhei == true
 //we convert to Fahrenheit!
-byte temperature= (pixels[8*4+4]*1.8+32+pixels[8*4+5]*1.8+32+pixels[8*3+4]*1.8+32+pixels[8*3+5]*1.8+32)/4;// we sample 4 samples because center of screen is 4 samples
+byte temperature= pixels[8*4+4]*1.8+32;//+pixels[8*4+5]*1.8+32+pixels[8*3+4]*1.8+32+pixels[8*3+5]*1.8+32)/4;// we sample 4 samples because center of screen is 4 samples
 #else
 byte temperature= (pixels[8*4+4]+pixels[8*4+5]+pixels[8*3+4]+pixels[8*3+5])/4;// we sample 4 samples because center of screen is 4 samples
 #endif
 
 
 
-Serial.println(temperature);
+//Serial.println(temperature);// for testing
 //we read from float buffer and convert to int, then convert to string output this method is ugly, just no reason to invest in better method.
 byte charplace1=temperature/10;//we have upper limit
 byte charplace2=temperature-charplace1*10;//we have upper limit
-tft.drawChar(64-10,64+5,48+charplace1,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
-tft.drawChar(64-10+5,64+5,48+charplace2,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
-tft.drawCircle(128/2,128/2,2,0xFFFF);
-tft.drawCircle(65,64+7,1,0xFFFF);
+tft.drawChar(64-11,64+5,48+charplace1,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+tft.drawChar(64-10+11,64+5,48+charplace2,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+tft.drawChar(60,60,111,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
+//tft.drawCircle(128/2,128/2,2,0xFFFF);
+//tft.drawCircle(65,64+7,1,0xFFFF);
 #endif
 
 }
