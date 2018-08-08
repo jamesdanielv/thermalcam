@@ -1,4 +1,4 @@
-//this version is rewritten by james villeneuve. i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
+//this version is rewritten by james villeneuve (jamesdanielv). i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
 I designed a method of sub sampling that does not use floats, it works currently to 32x32 with st77xx display and arduino.
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
