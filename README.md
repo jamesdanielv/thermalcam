@@ -16,7 +16,7 @@ since display update is the most time intensive task (5000-7000 microseconds per
 
 there also is an alternate library for st77xx, this includes a fillRectFast, in place of fillRect. this command includes a method of bursting spi, so while spi data being sent, other data is loaded, this way spi is always busy, even at fastest clock speed of 8mhz.
 
-
+for 16x16 mode:
 memory usage from arduino ide: Sketch uses 14,742 bytes (47%) of program storage space. Maximum is 30,720 bytes. Global variables use 927 bytes (45%) of dynamic memory, leaving 1,121 bytes for local variables. Maximum is 2,048 bytes.
 faster more memory efficient way of thermal cam imaging //this library does following
 
