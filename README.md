@@ -2,8 +2,10 @@
 
 I designed a method of sub sampling that does not use floats, it works currently to 32x32 with st77xx display and arduino.
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
-with little issue (not bad!)
-
+with little issue (not bad!) but currently as of 8_5 it does up to 32x32
+some videos to help understand it
+//https://www.youtube.com/watch?v=PFyu2S1H0v0 info on color tables (some sound issues. sorry)
+//https://www.youtube.com/watch?v=3Lv6EnFy4k4 info about buffering
 
 color generator file should be downloaded and opened in a browser. as of 7/22/18 most features can be changes from web page gui.
 for compatability with adafruit code, change #define spi_optimized_st77xx true to false, this allows standard libraries to be used with thermalcam.ino file. if use the code in this folder and includeds st77xx.ccp and st77xx.h spi bursts will be 
