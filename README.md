@@ -4,6 +4,7 @@ I designed a method of sub sampling that does not use floats, it works currently
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
 with little issue (not bad!) but currently as of 8_5 it does up to 32x32
 some videos to help understand it
+https://www.thingiverse.com/thing:3017556 color table generator javascript page automates table builds
 //https://www.youtube.com/watch?v=PFyu2S1H0v0 info on color tables (some sound issues. sorry)
 //https://www.youtube.com/watch?v=3Lv6EnFy4k4 info about buffering
 
