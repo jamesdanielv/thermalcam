@@ -127,6 +127,11 @@ class Adafruit_ST77xx : public Adafruit_GFX {
              uint16_t color),
            fillRectFast4colors(int16_t x, int16_t y, int16_t w, int16_t h,
              uint16_t color0, uint16_t color1, uint16_t color2, uint16_t color3),
+           fillRectFast16colors(int16_t x, int16_t y, int16_t w, int16_t h,
+             uint16_t color0, uint16_t color1, uint16_t color2, uint16_t color3,
+             uint16_t color4, uint16_t color5, uint16_t color6, uint16_t color7,
+             uint16_t color8, uint16_t color9, uint16_t color10, uint16_t color11,
+             uint16_t color12, uint16_t color13, uint16_t color14, uint16_t color15),
            setRotation(uint8_t r),
            invertDisplay(boolean i);
   uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
