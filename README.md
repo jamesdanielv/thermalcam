@@ -14,9 +14,12 @@ faster.
 
 also  subpixelcoloroptimized should be set to 0 if using default st77xx files, as they dont include 4 and 16 write rectanges at a time mode.
 
+adafruit_amg88xx.ccp also may need to have:  this is in my code only. original doesnt haave code for sensor read flip
+#define AMG88xx_PIXEL_MIRROR true set to false
+
 this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries, except for st77xx librarys which run slower than the extra ones i include in main directory.
 since display update is the most time intensive task (5000-7000 microseconds per pixel)
-(with my st77xx update it goes down to under 500 with same display!) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved.
+(with my st77xx update it goes down to under 100 with same display!) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved.
 
 there also is an alternate library for st77xx, this includes a fillRectFast, in place of fillRect. this command includes a method of bursting spi, so while spi data being sent, other data is loaded, this way spi is always busy, even at fastest clock speed of 8mhz.
 
