@@ -1,3 +1,5 @@
+//this version updated and modified with float free buffer, and less memory requirements by james villeneuve
+//please give credit to authors of software and include original authors below. support adafruit.
 //this version is set to be compatible with st77xx defaults drivers. recommend that you change drivers for the ones 
 //included at https://github.com/jamesdanielv/thermalcam/edit/master/thermal_cam.ino
 //then change the following values
@@ -9,7 +11,7 @@
 //most updated version of thermal_cam file can replace the one in zip file
 //this is a work in process. 16x16 subsample seems to work ok, trying to verify 32x32 and add up to 512 by 512
 //some changes may be needed to have includes location changes also spixx.h just uses libray in file change back to <spi.h>
-//this is the only file where code changes are, so just replace old file with this one 
+//this is the only file where code changes are required by default, so just replace old file with this one 
 //and change libary include file locations
 //32x32 might need work. will need to first increase color table to be sure
 //located here on github :https://github.com/jamesdanielv/thermalcam/edit/master/thermal_cam.ino
