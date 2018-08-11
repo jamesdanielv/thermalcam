@@ -1748,20 +1748,20 @@ ixx*8+offsetxx+tempint*(raster_yx*interpolateSampleDir),
 16,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
 16,//we divide hieght of pixels.
 subpixelbuffer[0  ],//we write pixels in different order so to match 4 rect writes at once
-subpixelbuffer[1  ],//  [0]{1]|[0][1]<-write    [0][1][2][3] <-4 at a time square updates first half of screen
-subpixelbuffer[0+8],// 0[2][3]|[2][3] 8         [4][5][6][7] this is why ordering is different
-subpixelbuffer[1+8],//----------------          [8][9][A][B] //this is how command updates screen
-subpixelbuffer[2  ],//  [0][1]|[0][1]           [C][D][E][F] ->zoom out [0.. ][4.. ]//how buffer is put  
-subpixelbuffer[3  ],// 4[2][3]|[2][3] 12                //              [8.. ][12..]//into 16 at a time command
-subpixelbuffer[2+8],                     
+subpixelbuffer[2  ],//  [0][2]|[0][2]<-write    [0][1][2][3] <-4 at a time square updates first half of screen
+subpixelbuffer[0+8],// 0[1][3]|[1][3] 8         [4][5][6][7] this is why ordering is different
+subpixelbuffer[2+8],//----------------          [8][9][A][B] //this is how command updates screen
+subpixelbuffer[1  ],//  [0][2]|[0][2]           [C][D][E][F] ->zoom out [0.. ][4.. ]//how buffer is put  
+subpixelbuffer[3  ],// 4[1][3]|[1][3] 12                //              [8.. ][12..]//into 16 at a time command
+subpixelbuffer[1+8],                     
 subpixelbuffer[3+8],// yes i know how to add it just makes more sense to show how
 subpixelbuffer[0+4],// it works and let compiler combine numbers
-subpixelbuffer[1+4],
-subpixelbuffer[0+12],
-subpixelbuffer[1+12],
 subpixelbuffer[2+4],
-subpixelbuffer[3+4],
+subpixelbuffer[0+12],
 subpixelbuffer[2+12],
+subpixelbuffer[1+4],
+subpixelbuffer[3+4],
+subpixelbuffer[1+12],
 subpixelbuffer[3+12]);
 
 }else{
@@ -1771,21 +1771,21 @@ ixx*8+offsetxx+tempint*(raster_yx*interpolateSampleDir),
 16,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
 16,//we divide hieght of pixels.
 subpixelbuffer[3  ],//we write|pixels in different order so to match 4 rect writes at once
-subpixelbuffer[2  ],//  [3][2]|[3][2]<-write    [0][1][2][3] <-4 at a time square updates first half of screen
-subpixelbuffer[3+8],//0 [1][0]|[1][0] 8         [4][5][6][7] this is why ordering is different
-subpixelbuffer[2+8],// -----------------        [8][9][A][B] //this is how command updates screen
-subpixelbuffer[1  ],//  [3][2]|[3][2]           [C][D][E][F] ->zoom out [0.. ][4.. ]//how buffer is put
-subpixelbuffer[0  ],//4 [1][0]|[1][0] 12                    //          [8.. ][12..]//into 16 at a time command     
-subpixelbuffer[1+8],//        |          
+subpixelbuffer[1  ],//  [3][1]|[3][1]<-write    [0][1][2][3] <-4 at a time square updates first half of screen
+subpixelbuffer[3+8],//0 [2][0]|[2][0] 8         [4][5][6][7] this is why ordering is different
+subpixelbuffer[1+8],// -----------------        [8][9][A][B] //this is how command updates screen
+subpixelbuffer[2  ],//  [3][1]|[3][1]           [C][D][E][F] ->zoom out [0.. ][4.. ]//how buffer is put
+subpixelbuffer[0  ],//4 [2][0]|[2][0] 12                    //          [8.. ][12..]//into 16 at a time command     
+subpixelbuffer[2+8],//        |          
 subpixelbuffer[0+8],// yes i know how to add it just makes more sense to show how
 subpixelbuffer[3+4],// it works and let compiler combine numbers
-subpixelbuffer[2+4],
+subpixelbuffer[1+4],
 subpixelbuffer[3+12],
-subpixelbuffer[2+12],
-subpixelbuffer[3+4],
-subpixelbuffer[2+4],
 subpixelbuffer[1+12],
-subpixelbuffer[0+12]);  
+subpixelbuffer[2+4],
+subpixelbuffer[0+4],
+subpixelbuffer[2+12],
+subpixelbuffer[0+12]); 
 }
 
 
