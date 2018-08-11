@@ -56,9 +56,9 @@
 
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
-#define colorMode 0  //can be 0=64 color adafruit, 1=256 color map 0,1 use same 256 color table space,2=1024 colors , or color=21 for alternate 1024 color map
+#define colorMode 2  //can be 0=64 color adafruit, 1=256 color map 0,1 use same 256 color table space,2=1024 colors , or color=21 for alternate 1024 color map
 #define spi_optimized_st77xx true  //false if using normal driver//these files are upaded and specific for this code needed st77xx,h, st77xx.cpp need downloaded from https://github.com/jamesdanielv/thermalcam/blob/master/colorgenerator
-#define subpixelcoloroptimized 0 //0= normal, 1= 4 pixels,2=16 pixels ,experimental this is for 32x32 sampling and above. requires custom st77xx.ccp, and st77xx.h files included in main folder  (4- 16 samples at a time!)
+#define subpixelcoloroptimized 2 //0= normal, 1= 4 pixels,2=16 pixels ,experimental this is for 32x32 sampling and above. requires custom st77xx.ccp, and st77xx.h files included in main folder  (4- 16 samples at a time!)
 
 #if spi_optimized_st77xx == true
 #define fillRectFast tft.fillRectFast
