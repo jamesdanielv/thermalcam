@@ -14,7 +14,7 @@ faster.
 
 also  subpixelcoloroptimized should be set to 0 if using default st77xx files, as they dont include 4 and 16 write rectanges at a time mode.
 
-adafruit_amg88xx.ccp also may need to have:  this is in my code only. original doesnt haave code for sensor read flip
+adafruit_amg88xx.ccp also has changes from default. it is only needed if sensor needs to be mirrored: 
 #define AMG88xx_PIXEL_MIRROR true set to false
 
 this code works out of box (for fast testing), but the best method is to rewrite the includes to use internal libraries, except for st77xx librarys which run slower than the extra ones i include in main directory.
