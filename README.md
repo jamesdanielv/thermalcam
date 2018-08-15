@@ -8,7 +8,7 @@ article on hackaday https://hackaday.io/project/160498-arduino-spi-up-to-30-time
 https://www.thingiverse.com/thing:3017556 color table generator javascript page automates table builds
 //https://www.youtube.com/watch?v=PFyu2S1H0v0 info on color tables (some sound issues. sorry)
 //https://www.youtube.com/watch?v=3Lv6EnFy4k4 info about buffering
-
+//https://www.thingiverse.com/thing:3050327 a thermal camera pointer
 color generator file should be downloaded and opened in a browser. as of 7/22/18 most features can be changes from web page gui.
 for compatability with adafruit code, change #define spi_optimized_st77xx true to false, this allows standard libraries to be used with thermalcam.ino file. if use the code in this folder and includeds st77xx.ccp and st77xx.h spi bursts will be 
 faster. 
