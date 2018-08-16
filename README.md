@@ -1,5 +1,7 @@
 //this version is rewritten by james villeneuve (jamesdanielv). i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
+The included adafruit_amg88xx.cpp file has a #define AMG88xx_PIXEL_MIRROR true. default is false. flips data order.
+
 I designed a method of sub sampling that does not use floats, it works currently to 32x32 uno or equivilent and 64x64 (atmega or better) with st77xx display and arduino. spi mode,amd pixel modes are more important on lower speed processors
 the advantage will come for faster processors in the sub pixel method that does not require floats.
 
