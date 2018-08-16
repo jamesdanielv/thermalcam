@@ -1,6 +1,8 @@
 //this version is rewritten by james villeneuve (jamesdanielv). i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 
-I designed a method of sub sampling that does not use floats, it works currently to 32x32 with st77xx display and arduino.
+I designed a method of sub sampling that does not use floats, it works currently to 32x32 uno or equivilent and 64x64 (atmega or better) with st77xx display and arduino. spi mode,amd pixel modes are more important on lower speed processors
+the advantage will come for faster processors in the sub pixel method that does not require floats.
+
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
 with little issue (not bad!) but currently as of 8_5 it does up to 32x32.
 some of the optimizations are due to multiple rectangle writes at a time. i have posted an article on hackaday and to there blog as well.
