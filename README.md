@@ -10,6 +10,7 @@ with little issue (not bad!) but currently as of 8_5 it does up to 32x32.
 some of the optimizations are due to multiple rectangle writes at a time. i have posted an article on hackaday and to there blog as well.
 article on hackaday https://hackaday.io/project/160498-arduino-spi-up-to-30-times-more-performance
 https://www.thingiverse.com/thing:3017556 color table generator javascript page automates table builds
+https://youtu.be/tLwYMQjD0l4 video about project details
 //https://www.youtube.com/watch?v=PFyu2S1H0v0 info on color tables (some sound issues. sorry)
 //https://www.youtube.com/watch?v=3Lv6EnFy4k4 info about buffering
 //https://www.thingiverse.com/thing:3050327 a thermal camera pointer
