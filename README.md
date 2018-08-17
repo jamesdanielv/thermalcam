@@ -2,7 +2,7 @@
 
 The included adafruit_amg88xx.cpp file has a #define AMG88xx_PIXEL_MIRROR true. default is false. flips data order.
 
-I designed a method of sub sampling that does not use floats, it works currently to 32x32 uno or equivilent and 64x64 (atmega or better) with st77xx display and arduino. spi mode,amd pixel modes are more important on lower speed processors
+I designed a method of sub sampling that does not use floats, it works currently to 32x32 uno or equivilent and 64x64 (atmega or better) with st77xx display and arduino. spi mode,and pixel modes optimizations are more important on lower speed processors, however the more power does mean more resolution in the future, and ability to run several tasks together.
 the advantage will come for faster processors in the sub pixel method that does not require floats.
 
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
