@@ -5,6 +5,8 @@ The included adafruit_amg88xx.cpp file has a #define AMG88xx_PIXEL_MIRROR true. 
 I designed a method of sub sampling that does not use floats, it works currently to 32x32 uno or equivilent and 64x64 (atmega or better) with st77xx display and arduino. spi mode,and pixel modes optimizations are more important on lower speed processors, however the more power does mean more resolution in the future, and ability to run several tasks together.
 the advantage will come for faster processors in the sub pixel method that does not require floats.
 
+currently i have redesigned the sub sample system, and it will undergo further change possbily later. for now buffer needs to be about 1/4 size of final resolution, but all that is really needed is extra bytes interpolate side pixel information. for now it is easier to understand with full buffers. so eventually for example 64x64 will work on arduino with 2k of ram, even though an actual 64x64 buffer with 16 bit wide color values would normally be 8k, since output values are directly inerpolated to new values, 32x32 (2k 16 bit color) is max mem needed for 64x64 buffers. so this is why it is possible with atmega currently, even though buffers are not optimized they are 1/4 size! later on buffers will not be needed except for cache to send multiple writes to display at a time.
+
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
 with little issue (not bad!) but currently as of 8_5 it does up to 32x32.
 some of the optimizations are due to multiple rectangle writes at a time. i have posted an article on hackaday and to there blog as well.
