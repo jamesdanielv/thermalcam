@@ -1,4 +1,6 @@
-read me changes here are simplified. the idea is to update this branch and when all modes tested, and features tested post to main branch 
+read me changes here are simplified. the idea is to update this branch and when all modes tested, and features tested post to main branch. seems easier as people understand files are always changing, but it keeps updates to original files quickly (all at same time), and this can be done as i have time with it known some files may have errors.
+
+
 also in this branch is a timer featuer that sends data to serial port, it slows down display updates, so disable it
 long tempt=micros()-timer;
 Serial.println(tempt);
