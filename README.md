@@ -10,9 +10,14 @@ in this iteration:
 
 
 coming soon or already in some form or another
+
 buffer removal 16x16 [ ] if checked done
+
 buffer removal 32x32 [ ] if checked done
+
 resolution increased to 128x128 [ ]
+
 include code for parallel display[ ]
+
 
 
