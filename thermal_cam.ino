@@ -33,35 +33,40 @@
 #define TFT_RST    9  // you can also connect this to the Arduino reset
                       // in which case, set this #define pin to 0!
 #define TFT_DC     8
-
+#define autorange true  //this adjust temp range over the color range of the screen experimental
 //low range of the sensor (this will be blue on the screen)
-#define MINTEMP 28
+#if autorange == false
+#define MINTEMP 24
 
 //high range of the sensor (this will be red on the screen)
 #define MAXTEMP 34
-
+#else
+int MINTEMP =24;
+int MAXTEMP =34; //we turn this into int value that can be adjusted
+#endif
 
 // 0 no optimse |1 pixels only written whe color changed| 2 pixels also optimized for most changed ones first (deals with noise issues)
 #define optimize  2 //
 
-#define interpolatemode 2 //can be 0-2 so far 0=8x8 1=16x16 2=32x32 3=64x64 only try 64x64 on atmega or greater. needs at least 4k of ram for those systems for now 
+#define interpolatemode 3 //can be 0-3 so far 0=8x8 1=16x16 2=32x32 3=64x64 only try 64x64 on atmega or greater. needs at least 4k of ram for those systems for now 
+//experimental subpixelcoloroptimized=3 more only works on interpolate mode 3, for interpolate mode 1,0 use subpixelcoloroptimized=0
 
-
-//noise filter experimental
-#define noisefilter 0 //0 is off.  this means temp variation needs to be greater than this for data to be sent to lcd, also you could program interupt of amg8833 for this as well
+//noise filter experimental also in 64x64 mode small pixel changes are dramatic. having this on in 64x64 will have pixel popping. still working on fix or smoothing
+#define noisefilter 2 //0 is off.  this means temp variation needs to be greater than this for data to be sent to lcd, also you could program interupt of amg8833 for this as well
 
 //*******************************below lines are for making device into a thermal pointing device look in Adafruit_AMG88xx.cpp for mirroring of sensor data (in this version)
 // look in Adafruit_AMG88xx.cpp file for a setting called #define AMG88xx_PIXEL_MIRROR //this mirrors image from left to right to right to left for sensor, such as when amg8833 device is pointing away from display. 
 #define show_temp_readout true //this shows center dot, and right below the temp for that dot. if false wont show anything
-#define temp_Fahrenhei true //we convert output temp to F, otherwise it is c
+#define temp_Fahrenheit true //we convert output temp to F, otherwise it is c
+#define showcolorbar true //this shows color range and bar. more useful for autorange
 //***********************************
 
 //const dataType variableName[] PROGMEM = {data0, data1, data3…​};// how to formate table for progmem or the way it is listed. in order for it to work correctly int needs to be reconverted to  (uint16_t)
 //the colors we will be using stored into a flash instead of ram which is valuable on arudino just use (uint16_t)pgm_read_word_near(camColors+ instead of Camcolors[]
-#define colorMode 2 //can be 0=64 color adafruit, 1=256 color map 0,1 use same 256 color table space,2=1024 colors , or color=21 for alternate 1024 color map, 22 for mostl black and white with high temp in color, 23 another color mode 
+#define colorMode 21 //can be 0=64 color adafruit, 1=256 color map 0,1 use same 256 color table space,2=1024 colors , or color=21 for alternate 1024 color map, 22 for mostl black and white with high temp in color, 23 another color mode 
 #define spi_optimized_st77xx true //false if using normal driver//these files are upaded and specific for this code needed st77xx,h, st77xx.cpp need downloaded from https://github.com/jamesdanielv/thermalcam/blob/master/colorgenerator
-#define subpixelcoloroptimized 2 //0= normal, 1= 4 pixels,2=16 pixels. requires custom st77xx.ccp, and st77xx.h files included in main folder  (4- 64 samples at a time!)
-
+#define subpixelcoloroptimized 2 //0= normal, 1= 4 pixels,2=16 pixels, 3=64 pixels. requires custom st77xx.ccp, and st77xx.h files included in main folder  (4- 64 samples at a time!), -1 blank for understanding loop other than lcd writes
+//subpixelcoloroptimized onl work with custom st77xx files currently and are only enabled if 32x32 or 64x64 subsampled enabled.
 #if spi_optimized_st77xx == true
 #define fillRectFast tft.fillRectFast
 #else
@@ -558,12 +563,12 @@ Adafruit_AMG88xx amg;
 unsigned long delayTime;
 
 float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
-int subpixelbuffer[16];//this is a buffer that holds pixel info to update several pixesl at a time!
+uint16_t subpixelbuffer[16];//this is a buffer that holds pixel info to update several pixesl at a time!
 
 //dont change optimize here, look for value at top
 #if optimize > 0 & colorMode <2
 
-byte pixelsbuf[AMG88xx_PIXEL_ARRAY_SIZE];
+int pixelsbuf[AMG88xx_PIXEL_ARRAY_SIZE];
 
 #endif
 
@@ -574,13 +579,13 @@ int pixelsbuf[AMG88xx_PIXEL_ARRAY_SIZE];//we double size of array so it can hand
 #endif
 
 #if interpolatemode >1 
-uint16_t postbuffer[AMG88xx_PIXEL_ARRAY_SIZE*4];//this is a temp buffer it wont always be needed
+int postbuffer[AMG88xx_PIXEL_ARRAY_SIZE*4];//this is a temp buffer it wont always be needed
 byte color4buf;//we use for drawing 4 at a time if enabled, just counts 0 to 3, or 0-15
 #endif
 
 #if interpolatemode >2 
-int subpixelbuffer2[64];//this is a buffer that holds pixel info to update up to 64  pixesl at a time!
-uint16_t postbuffer2[AMG88xx_PIXEL_ARRAY_SIZE*16];//this is a temp buffer it wont always be needed
+uint16_t subpixelbuffer2[64];//this is a buffer that holds pixel info to update up to 64  pixesl at a time!
+int postbuffer2[AMG88xx_PIXEL_ARRAY_SIZE*16];//this is a temp buffer it wont always be needed
 byte color4buf2;//we use for drawing several pixels at a time
 #endif
 
@@ -640,16 +645,168 @@ int compressionflux=50;//this number goes up and down depending on how many pixe
 void subpixelcolor(int Pixelsample,int SidePixel,int BottomPixel,int BottomSidePixel,byte Xdir, byte Ydir,byte x, byte y){
 //this routine figures out how to sub sample pixel, and returns pixel in x,y position from sub
 //not yet in this place but soon i hope
-
+ 
   
 }
 
+//********** faster than map data, since we know we are using 256/ or 1024 values and start with min of 0
+float cachedTempVar;//we use for comparing, keep same range unless it changes again
+float cachedtempdata;//this is data we reuse!!
+float Fasttempcachemap256(float valuechange){
+//int colorIndex= (pixels[i+j*8]-MINTEMP)*1024/(MAXTEMP-MINTEMP);//this should do the same thing!
+if (cachedTempVar !=MAXTEMP+MINTEMP){cachedtempdata=256/(MAXTEMP-MINTEMP);cachedTempVar =MAXTEMP+MINTEMP;}
+valuechange=(valuechange-MINTEMP)*cachedTempVar;
+return valuechange;
+}
+
+
+float Fasttempcachemap1024(float valuechange){
+//int colorIndex= (pixels[i+j*8]-MINTEMP)*1024/(MAXTEMP-MINTEMP);//this should do the same thing!
+if (cachedTempVar !=MAXTEMP+MINTEMP){cachedtempdata=1024/(MAXTEMP-MINTEMP);cachedTempVar =MAXTEMP+MINTEMP;}
+valuechange=(valuechange-MINTEMP)*cachedTempVar;
+return valuechange;
+}
+
+
+//****************** end of faster mapping
+int colorRangeSet(int colordata, float Value){
+//we determine range of color for temp
+#if colorMode <2 
+  colordata= Fasttempcachemap256(Value);
+ #else
+ colordata=Fasttempcachemap1024( Value);//we constrain color after subsampling
+ 
+#endif
+return colordata;
+}
+int colorClamp(int colordata){
+#if colorMode < 2
+ colordata= colordata &255;//subsample with real pixel and surounding pixels
+#else
+ colordata= colordata&1023;//subsample with real pixel and surounding pixels
+#endif
+if (colordata<0){ colordata=0;}
+return colordata;
+
+}
+//this area is code that updates display with numeric data and shows color bar if set
+void displayaddons(){
+#if showcolorbar == true
+//we erase areas where text shows on side first
+
+//we only draw bar if advanded st77xx drivers included!
+//upper limit temp
+#if temp_Fahrenheit == true
+byte tempf=MAXTEMP*1.8+32;
+byte charplace1a= tempf /10;//we have upper limit
+byte charplace2a= tempf-charplace1a*10;//we have upper limit
+#endif
+
+#if temp_Fahrenheit == false
+byte tempf=MAXTEMP;
+byte charplace1a= tempf /10;//we have upper limit
+byte charplace2a= tempf-charplace1a*10;//we have upper limit
+#endif
+if (tempf<100){
+tft.drawChar(128-22,128-13,48+charplace1a,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+tft.drawChar(128-11,128-13,48+charplace2a,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+}else{
+//draw NA
+tft.drawChar(128-11,128-13,65,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+tft.drawChar(128-22,128-13,78,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+}
+
+
+//tft.drawChar(11,128-13,65,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+//tft.drawChar(0,128-13,78,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+
+//lower limit temp
+#if temp_Fahrenheit == true
+byte tempf2=MINTEMP*1.8+32;
+byte charplace1b= tempf2 /10;//we have upper limit
+byte charplace2b= tempf2-charplace1b*10;//we have upper limit
+#endif
+
+#if temp_Fahrenheit == false
+byte tempf2=MINTEMP;
+byte charplace1b= tempf2 /10;//we have upper limit
+byte charplace2b= tempf2-charplace1b*10;//we have upper limit
+#endif
+if (tempf2>0){
+tft.drawChar(0,128-13,48+charplace1b,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+tft.drawChar(11,128-13,48+charplace2b,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+}else{
+//draw NA
+tft.drawChar(11,128-13,65,0xFFFF,0x0000,2);//already in code if same color, transperant background!
+tft.drawChar(0,128-13,78,0xFFFF,0x0000F,2);//already in code if same color, transperant background!
+}
+// we draw  color bar!
+
+//this area for keymap at bottom of display
+tft.drawRect(24,  128-13,80,  10,0x0000) ;//box outline
+float range=MAXTEMP-MINTEMP;
+float stepcolorchange=range*0.025;//1/40
+float colorstepping=MINTEMP;//this is the start value
+int colorOfbararea=0;
+for (int drawbar=0;drawbar<40;drawbar++){
+colorOfbararea=colorRangeSet(colorOfbararea,colorstepping);
+  tft.fillRect(24+drawbar*2, 128-12,2, 8,(uint16_t)pgm_read_word_near(camColors+colorOfbararea));
+colorstepping+= stepcolorchange; 
+}
+
+#endif
+//this is last area before refresh most the code here and below is just for temp readout, averaging middle 4 data.
+#if show_temp_readout == true 
+
+#if temp_Fahrenheit == true
+//we convert to Fahrenheit!
+int temperature= pixels[8*4+4]*1.8+32;//+pixels[8*4+5]*1.8+32+pixels[8*3+4]*1.8+32+pixels[8*3+5]*1.8+32)/4;// we sample 4 samples because center of screen is 4 samples
+#else
+int temperature= (pixels[8*4+4]+pixels[8*4+5]+pixels[8*3+4]+pixels[8*3+5])/4;// we sample 4 samples because center of screen is 4 samples
+#endif
+
+
+
+//Serial.println(temperature);// for testing
+//we read from float buffer and convert to int, then convert to string output this method is ugly, just no reason to invest in better method.
+if (temperature >0 & temperature<100){
+byte charplace1=temperature/10;//we have upper limit
+byte charplace2=temperature-charplace1*10;//we have upper limit
+
+tft.drawChar(64-11,64+5,48+charplace1,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+tft.drawChar(64-10+11,64+5,48+charplace2,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+
+}else{
+if (temperature>99){//we put 'NA' on screen
+tft.drawChar(64-11,64+5,78,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+tft.drawChar(64-10+11,64+5,65,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
+}
+}
+//we print a little 'o' faster than drawing a circle.
+tft.drawChar(60,60,111,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
+
+#endif
+
+}
+//********* end of area*****************************************
 byte slowupdate=0;//used to refesh different amounts, makes sure pixels update more timely. solves noisy pixels
 long timer=micros();//for timing
 void loop() {
 //this line below reads the sensor data
-amg.readPixels(pixels);
 
+amg.readPixels(pixels);
+#if autorange == true
+
+float templow=1024;
+float temphi=0;
+for (int counti=0;counti<63; counti ++){
+//some sort of crude bubble sort.
+if (pixels[counti]>temphi){temphi=pixels[counti];}
+if (pixels[counti]<templow){templow=pixels[counti];}
+};
+MINTEMP=MINTEMP*0.5+(templow-2)*0.5;
+MAXTEMP=MAXTEMP*0.5+(temphi+1)*0.5;
+#endif
 //*********
 float tempr=0.0;
 
@@ -671,12 +828,9 @@ if (i>7){i=0;k++;}//here we run code that makes sense of supersubsamples, sample
 
 timer=micros();//used for testing
 
-   #if colorMode <2
-    int colorIndex = map(pixels[i+j*8], MINTEMP, MAXTEMP, 0, 255); //we resuse this sample 
-    #else
-    //trying to average pixle data//
-     int colorIndex = map(pixels[i+j*8], MINTEMP, MAXTEMP, 0, 1023); //we resuse this sample 
-   #endif
+
+    int colorIndex  =  colorRangeSet( colorIndex , pixels[i+j*8]);
+
 
     //we now compress and only update pixels on screen that change the most! it works and over time they all change, but to be sure force updates
 #if optimize>1 
@@ -710,22 +864,24 @@ pixelsbuf[i+j*8] =colorIndex;//we just make sure latest pixel value gets stored 
 if (i+j*8 !=(i+j*8)|slowupdate)    compressionnumber++;// we only count priority pixels, not ones with slower refresh
  
 #endif    
-
+#if  showcolorbar == true 
+if ( i < 7 ){ //we dont write last line of data   
+#endif
 
 #if interpolatemode == 0
    //this is original for display code pixel placement
    //there is also spi optimizations to allow spi bursts during pixel writes if using included st77xx.h and st77xx.cpp files 
-   #if colorMode <2
-   colorIndex=constrain(colorIndex,0,255);
-   #else
-   colorIndex=constrain(colorIndex,0,1023);
-   #endif
+colorIndex=colorClamp(colorIndex);
+
+
+   #if  subpixelcoloroptimized !=-1 //we test without lcd writes with -1
     tft.fillRect(displayPixelWidth *j, displayPixelHeight * i,displayPixelWidth, displayPixelHeight,(uint16_t)pgm_read_word_near(camColors+colorIndex));
+    #endif
 #endif
 
 
 
-
+/////////////////////////////////begin of loop unroll///////////////////////////////////// 
 #if interpolatemode > 0
 //long timer =micros();//we are timing code for speed
 //how it updates when more than 2x2 sub pixels
@@ -744,7 +900,6 @@ int offset=0;
 if (j<4){interpolateSampleDir =1;}// we process left to right here . we need to change this so it scales with display resolution
          else{interpolateSampleDir =-1;offset=displayPixelHeight-displayPixelHeight/pixelSizeDivide;}//if past half way on display we sample in other direction
  //long timecount=micros();
-
 // getsubpixelcolor(pixelSizerDivide);//side pixel,vertical pixil,LeftOrRigh,current pixel
 int raster_x=0;
 while (raster_x !=(pixelSizeDivide*interpolateSampleDir)){ //done with != instead of <> so i could invert direction ;)  
@@ -753,21 +908,21 @@ while (raster_x !=(pixelSizeDivide*interpolateSampleDir)){ //done with != instea
 
 //we keep sample size from nieghbor pixels even when sample divides increase
 
-#if colorMode <2
-int  tempcolor= map(pixels[(i+raster_y+interpolatesampledir2)+(j+raster_x)*8], MINTEMP, MAXTEMP, 0, 255);//we constrain color after subsampling
+#if colorMode <2 //Fasttempcachemap256(pixels[i+j*8]);
+int  tempcolor= Fasttempcachemap256(pixels[(i+raster_y+interpolatesampledir2)+(j+raster_x)*8]);
  #else
-int  tempcolor= map(pixels[(i+raster_y+interpolatesampledir2)+(j+raster_x)*8], MINTEMP, MAXTEMP, 0, 1023);//we constrain color after subsampling
+int  tempcolor=Fasttempcachemap1024(pixels[(i+raster_y+interpolatesampledir2)+(j+raster_x)*8]);//we constrain color after subsampling
  
 #endif
 
 //next line changes the average of the color between the main pixel and the sub pixels
-tempcolor=(( tempcolor*(pixelSizeDivide-raster_y)+ colorIndex*raster_y)+tempcolor*(raster_x)+colorIndex*(pixelSizeDivide-raster_x))/4;//subsample with real pixel and surounding pixels
+tempcolor=(( tempcolor*(2-raster_y)+ colorIndex*raster_y)+tempcolor*(raster_x)+colorIndex*(2-raster_x))/4;//subsample with real pixel and surounding pixels
 
 
 #if colorMode < 2
-tempcolor=constrain(tempcolor,0,255);//subsample with real pixel and surounding pixels
+tempcolor=tempcolor &255;//subsample with real pixel and surounding pixels
 #else
-tempcolor=constrain(tempcolor,0,1023);//subsample with real pixel and surounding pixels
+tempcolor=tempcolor&1023;//subsample with real pixel and surounding pixels
 #endif
 #endif  //interpolatemode
 //int  tempcolor= map(pixels[(i+(raster_y/(pixelSizeDivide/2))+interpolatesampledir2)+(j+(raster_x/(pixelSizeDivide/2)))*8], MINTEMP, MAXTEMP, 0, 1023);//we constrain color after subsampling
@@ -792,13 +947,14 @@ postbuffer[((j+j+offsetx+ (interpolateSampleDir)*(raster_x*interpolateSampleDir)
 
 #if  interpolatemode == 1
 //we use data directly from interpolated sub
+   #if  subpixelcoloroptimized !=-1 //we test without lcd writes with -1
 fillRectFast(displayPixelWidth *j+
 offset+ (interpolateSampleDir*displayPixelWidth/pixelSizeDivide)*(raster_x*interpolateSampleDir), //we reduce pixle size and step over in raster extra pixels created
 displayPixelHeight* i+offset+(interpolateSampleDir*displayPixelHeight/pixelSizeDivide)*(raster_y*interpolateSampleDir),
 displayPixelWidth/pixelSizeDivide,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
 displayPixelHeight/pixelSizeDivide,//we divide hieght of pixels.
 (uint16_t)pgm_read_word_near(camColors+tempcolor));  //we update pixel location with new subsampled pixel.
-
+#endif
 #endif
 
 //would it make sense to subdivide to color of pixel directly? yes except camcolors is set with colors translated for heat.
@@ -810,8 +966,8 @@ raster_y +=  interpolateSampleDir;
 
    raster_x += interpolateSampleDir;
 }//interpolatepixel_x 
-
- #endif
+#endif
+ /////////////////////////////////end of loop unroll/////////////////////////////////////
 #if  interpolatemode >1
 uint16_t jxx=j+j;
 while (jxx != j+j+2){//double resolution in j
@@ -840,21 +996,12 @@ int  tempcolorx= postbuffer[(ixx+raster_yx+interpolatesampledir2)+(jxx+raster_xx
 
 #if  interpolatemode  > 1
 //next line changes the average of the color between the main pixel and the sub pixels
-tempcolorx=(( tempcolorx*(pixelSizeDividex-raster_yx)+ colorIndexx*raster_yx)/pixelSizeDividex+(tempcolorx*(raster_xx)+colorIndexx*(pixelSizeDividex-raster_xx))/pixelSizeDividex)/2;//subsample with real pixel and surounding pixels
+tempcolorx=(( tempcolorx*(2-raster_yx)+ colorIndexx*raster_yx)+(tempcolorx*(raster_xx)+colorIndexx*(2-raster_xx)))/4;//subsample with real pixel and surounding pixels
 //#endif
 
 
-#if colorMode < 2
-tempcolorx=constrain(tempcolorx,0,255);//subsample with real pixel and surounding pixels
-#else
-tempcolorx=constrain(tempcolorx,0,1023);//subsample with real pixel and surounding pixels
-#endif
-//#if interpolatemode  > 1
 
-
-
-
-
+tempcolorx=colorClamp(tempcolorx);//subsample with real pixel and surounding pixels
 //this is where 32 x32 is buffered so it can be upsampled
 
 #if interpolatemode > 2 //this stores 32 x32 buffer, and we upsample it to 64x64. we will remove need of this at a later date.
@@ -896,7 +1043,7 @@ if (jxx<8){offsetxx=-12;}else{offsetxx=-4;}//this is different on 16 writes beca
 
 int tempint=interpolateSampleDir*4;//we reuse so calculate one time
 if (jxx>7){offsetxx=4;}//this line needed to fix the offsets value for some reason.
-
+   #if  subpixelcoloroptimized !=-1 //we test without lcd writes with -1
 fillRectFast(jxx*8+
 offsetxx+ tempint*(raster_xx*interpolateSampleDir), //we reduce pixle size and step over in raster extra pixels created
 ixx*8+offsetxx+tempint*(raster_yx*interpolateSampleDir),
@@ -904,7 +1051,7 @@ ixx*8+offsetxx+tempint*(raster_yx*interpolateSampleDir),
 4,//we divide hieght of pixels.
 (uint16_t)pgm_read_word_near(camColors+tempcolorx));  //we update pixel location with new subsampled pixel.
 #endif
-
+#endif
 #if subpixelcoloroptimized == 1 //we finish write update to display
 //this write only happens every 4 loops to display! we capture 4 pixels and update all at one time!
 if (jxx<8){
@@ -1031,21 +1178,21 @@ int  tempcolorx32= postbuffer2[(ix32+raster_yxx+interpolatesampledir2)+(jx32+ras
 
 //#if  interpolatemode  > 1
 //next line changes the average of the color between the main pixel and the sub pixels
-tempcolorx32=(( tempcolorx32*(pixelSizeDividexx-raster_yxx)+ colorIndex32*raster_yxx)/pixelSizeDividexx+(tempcolorx32*(raster_xxx)+colorIndex32*(pixelSizeDividexx-raster_xxx))/pixelSizeDividexx)/2;//subsample with real pixel and surounding pixels
+tempcolorx32=(( tempcolorx32*(2-raster_yxx)+ colorIndex32*raster_yxx)+(tempcolorx32*(raster_xxx)+colorIndex32*(2-raster_xxx)))/4;//subsample with real pixel and surounding pixels
 
 
 
 #if colorMode < 2
-tempcolorx32=constrain(tempcolorx32,0,255);//subsample with real pixel and surounding pixels
+tempcolorx32=tempcolorx32&255;//subsample with real pixel and surounding pixels
 #else
-tempcolorx32=constrain(tempcolorx32,0,1023);//subsample with real pixel and surounding pixels
+tempcolorx32=tempcolorx32&1023;//subsample with real pixel and surounding pixels
 #endif
 #if subpixelcoloroptimized == 3 //this is for writing 64 rectangles at a time!
 subpixelbuffer2[color4buf2]=(uint16_t)pgm_read_word_near(camColors+tempcolorx32);
 color4buf2++;//we count 0-3 and reset again, each pixel set and we draw 4 colors at a time
 if (color4buf2>63){color4buf2=0;//we leave this open because each reset trigger display write
 int tempintx=interpolateSampleDir*4;//we reuse so calculate one time
-if (jx32<16){offsetx32=-12;}else{offsetx32=-4;}//this is different on 16 writes becauae pixels are offset more.
+if (jx32<16){offsetx32=-16;}else{offsetx32=-8;}//this is different on 64 writes becauae pixels are offset more.
 #endif
 
 #if subpixelcoloroptimized == 2 //this is for writing 16 rectangles at a time!
@@ -1053,7 +1200,7 @@ subpixelbuffer2[color4buf2]=(uint16_t)pgm_read_word_near(camColors+tempcolorx32)
 color4buf2++;//we count 0-3 and reset again, each pixel set and we draw 4 colors at a time
 if (color4buf2>15){color4buf2=0;//we leave this open because each reset trigger display write
 int tempintx=interpolateSampleDir*4;//we reuse so calculate one time
-if (jx32<16){offsetx32=-12;}else{offsetx32=-4;}//this is different on 16 writes becauae pixels are offset more.
+if (jx32<16){offsetx32=-8;}else{offsetx32=0;}//this is different on 16 writes becauae pixels are offset more.
 #endif
 
 
@@ -1062,14 +1209,14 @@ if (jx32<16){offsetx32=-12;}else{offsetx32=-4;}//this is different on 16 writes 
 //this is write one pixel at a time 64 x64 mode
 int tempintx=interpolateSampleDir*2;//we reuse so calculate one time
 //if (jx32>15){offsetx32=4;}//this line needed to fix the offsets value for some reason.
-
+#if  subpixelcoloroptimized !=-1 //we test without lcd writes with -1
 fillRectFast(jx32*4+ offsetx32+ tempintx*(raster_xxx*interpolateSampleDir), //we reduce pixle size and step over in raster extra pixels created
 ix32*4+offsetx32+tempintx*(raster_yxx*interpolateSampleDir),
 2,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
 2,//we divide hieght of pixels.
 (uint16_t)pgm_read_word_near(camColors+tempcolorx32));  //we update pixel location with new subsampled pixel.
 #endif
-
+#endif
 
 //64 bit one rectangle at a time output
 #if subpixelcoloroptimized ==1 //this is for writing 4 rectangles at a time!
@@ -1170,51 +1317,60 @@ subpixelbuffer2[0+12]);
 
 //we write 16 squarea at a time to display. this reduces command calls drastically
 //this write only happens every 16 loops to display! we capture 16 pixels and update all at one time!
-if (jxx<8){
+if (jx32<16){
 tft.fillRectFast64colors(jx32*4+
 offsetx32+ tempintx*(raster_xxx*interpolateSampleDir), //we reduce pixle size and step over in raster extra pixels created
 ix32*4+offsetx32+tempintx*(raster_yxx*interpolateSampleDir),
-8,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
-8,//we divide hieght of pixels.
-subpixelbuffer2[0  ],//we write pixels in different order so to match 4 rect writes at once
-subpixelbuffer2[2  ],//  [0][2]|[0][2]<-write    [0][1][2][3] <-4 at a time square updates first half of screen
-subpixelbuffer2[0+8],// 0[1][3]|[1][3] 8         [4][5][6][7] this is why ordering is different
-subpixelbuffer2[2+8],//----------------          [8][9][A][B] //this is how command updates screen
-subpixelbuffer2[1  ],//  [0][2]|[0][2]           [C][D][E][F] ->zoom out [0.. ][4.. ]//how buffer is put  
-subpixelbuffer2[3  ],// 4[1][3]|[1][3] 12                //              [8.. ][12..]//into 16 at a time command
-subpixelbuffer2[1+8],                     
-subpixelbuffer2[3+8],// yes i know how to add it just makes more sense to show how
-subpixelbuffer2[0+4],// it works and let compiler combine numbers
-subpixelbuffer2[2+4],
-subpixelbuffer2[0+12],
-subpixelbuffer2[2+12],
-subpixelbuffer2[1+4],
-subpixelbuffer2[3+4],
-subpixelbuffer2[1+12],
-subpixelbuffer2[3+12]);
-
+16,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
+16,//we divide hieght of pixels.
+//0.        8        32        40
+//[0][2]  [0][2]  [0][2]  [0][2]  //this is how this side of data is sent to display
+//[1][3]  [1][3]  [1][3]  [1][3] //we buffer it and reorder it so it goes in sequence
+//4       12       36      44
+//[0][2]  [0][2]  [0][2]  [0][2]
+//[1][3]  [1][3]  [1][3]  [1][3]
+//16      20      48       56
+//[0][2]  [0][2]  [0][2]  [0][2]
+//[1][3]  [1][3]  [1][3]  [1][3] 
+//24       28     52       60
+//[0][2]  [0][2]  [0][2]  [0][2]
+//[1][3]  [1][3]  [1][3]  [1][3]
+subpixelbuffer2[0+0],subpixelbuffer2[0+2],subpixelbuffer2[8+0],subpixelbuffer2[8+2],subpixelbuffer2[32+0],subpixelbuffer2[32+2],subpixelbuffer2[40+0],subpixelbuffer2[40+2],//row0
+subpixelbuffer2[0+1],subpixelbuffer2[0+3],subpixelbuffer2[8+1],subpixelbuffer2[8+3],subpixelbuffer2[32+1],subpixelbuffer2[32+3],subpixelbuffer2[40+1],subpixelbuffer2[40+3],//row1
+subpixelbuffer2[4+0],subpixelbuffer2[4+2],subpixelbuffer2[12+0],subpixelbuffer2[12+2],subpixelbuffer2[36+0],subpixelbuffer2[36+2],subpixelbuffer2[44+0],subpixelbuffer2[44+2],//row2
+subpixelbuffer2[4+1],subpixelbuffer2[4+3],subpixelbuffer2[12+1],subpixelbuffer2[12+3],subpixelbuffer2[36+1],subpixelbuffer2[36+3],subpixelbuffer2[44+1],subpixelbuffer2[44+3],//row3
+subpixelbuffer2[16+0],subpixelbuffer2[16+2],subpixelbuffer2[20+0],subpixelbuffer2[20+2],subpixelbuffer2[48+0],subpixelbuffer2[48+2],subpixelbuffer2[56+0],subpixelbuffer2[56+2],//row4
+subpixelbuffer2[16+1],subpixelbuffer2[16+3],subpixelbuffer2[20+1],subpixelbuffer2[20+3],subpixelbuffer2[48+1],subpixelbuffer2[48+3],subpixelbuffer2[56+1],subpixelbuffer2[56+3],//row5
+subpixelbuffer2[24+0],subpixelbuffer2[24+2],subpixelbuffer2[28+0],subpixelbuffer2[28+2],subpixelbuffer2[52+0],subpixelbuffer2[52+2],subpixelbuffer2[60+0],subpixelbuffer2[60+2],//row6
+subpixelbuffer2[24+1],subpixelbuffer2[24+3],subpixelbuffer2[28+1],subpixelbuffer2[28+3],subpixelbuffer2[52+1],subpixelbuffer2[52+3],subpixelbuffer2[60+1],subpixelbuffer2[60+3]//row7
+);  
 }else{
 tft.fillRectFast64colors(jx32*4+
 offsetx32+ tempintx*(raster_xxx*interpolateSampleDir), //we reduce pixle size and step over in raster extra pixels created
 ix32*4+offsetx32+tempintx*(raster_yxx*interpolateSampleDir),
-8,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
-8,//we divide hieght of pixels.
-subpixelbuffer2[3  ],//we write|pixels in different order so to match 4 rect writes at once
-subpixelbuffer2[1  ],//  [3][1]|[3][1]<-write    [0][1][2][3] <-4 at a time square updates first half of screen
-subpixelbuffer2[3+8],//0 [2][0]|[2][0] 8         [4][5][6][7] this is why ordering is different
-subpixelbuffer2[1+8],// -----------------        [8][9][A][B] //this is how command updates screen
-subpixelbuffer2[2  ],//  [3][1]|[3][1]           [C][D][E][F] ->zoom out [0.. ][4.. ]//how buffer is put
-subpixelbuffer2[0  ],//4 [2][0]|[2][0] 12                    //          [8.. ][12..]//into 16 at a time command     
-subpixelbuffer2[2+8],//        |          
-subpixelbuffer2[0+8],// yes i know how to add it just makes more sense to show how
-subpixelbuffer2[3+4],// it works and let compiler combine numbers
-subpixelbuffer2[1+4],
-subpixelbuffer2[3+12],
-subpixelbuffer2[1+12],
-subpixelbuffer2[2+4],
-subpixelbuffer2[0+4],
-subpixelbuffer2[2+12],
-subpixelbuffer2[0+12]);  
+16,//we divide width of pixels. /2,4,8,16 is fast and compiler can just do bit shift for it
+16,//we divide hieght of pixels.
+//0.        8        32        40
+//[3][1]  [3][1]  [3][1]  [3][1]   //this is how this side of data is sent to display
+//[2][0]  [2][0]  [2][0]  [2][0]  //we buffer it and reorder it so it goes in sequence
+//4       12       36      44
+//[3][1]  [3][1]  [3][1]  [3][1]  
+//[2][0]  [2][0]  [2][0]  [2][0]
+//16      20      48       56
+//[3][1]  [3][1]  [3][1]  [3][1]  
+//[2][0]  [2][0]  [2][0]  [2][0]
+//24       28     52       60
+//[3][1]  [3][1]  [3][1]  [3][1]  
+//[2][0]  [2][0]  [2][0]  [2][0]
+subpixelbuffer2[0+3],subpixelbuffer2[0+1],subpixelbuffer2[8+3],subpixelbuffer2[8+1],subpixelbuffer2[32+3],subpixelbuffer2[32+1],subpixelbuffer2[40+3],subpixelbuffer2[40+1],//row0
+subpixelbuffer2[0+2],subpixelbuffer2[0+0],subpixelbuffer2[8+2],subpixelbuffer2[8+0],subpixelbuffer2[32+2],subpixelbuffer2[32+0],subpixelbuffer2[40+2],subpixelbuffer2[40+0],//row1
+subpixelbuffer2[4+3],subpixelbuffer2[4+1],subpixelbuffer2[12+3],subpixelbuffer2[12+1],subpixelbuffer2[36+3],subpixelbuffer2[36+1],subpixelbuffer2[44+3],subpixelbuffer2[44+1],//row2
+subpixelbuffer2[4+2],subpixelbuffer2[4+0],subpixelbuffer2[12+2],subpixelbuffer2[12+0],subpixelbuffer2[36+2],subpixelbuffer2[36+0],subpixelbuffer2[44+2],subpixelbuffer2[44+0],//row3
+subpixelbuffer2[16+3],subpixelbuffer2[16+1],subpixelbuffer2[20+3],subpixelbuffer2[20+1],subpixelbuffer2[48+3],subpixelbuffer2[48+1],subpixelbuffer2[56+3],subpixelbuffer2[56+1],//row4
+subpixelbuffer2[16+2],subpixelbuffer2[16+0],subpixelbuffer2[20+2],subpixelbuffer2[20+0],subpixelbuffer2[48+2],subpixelbuffer2[48+0],subpixelbuffer2[56+2],subpixelbuffer2[56+0],//row5
+subpixelbuffer2[24+3],subpixelbuffer2[24+1],subpixelbuffer2[28+3],subpixelbuffer2[28+1],subpixelbuffer2[52+3],subpixelbuffer2[52+1],subpixelbuffer2[60+3],subpixelbuffer2[60+1],//row6
+subpixelbuffer2[24+2],subpixelbuffer2[24+0],subpixelbuffer2[28+2],subpixelbuffer2[28+0],subpixelbuffer2[52+2],subpixelbuffer2[52+0],subpixelbuffer2[60+2],subpixelbuffer2[60+0]//row7
+);    
 }
 
 
@@ -1241,7 +1397,9 @@ raster_yxx +=  interpolateSampleDir;
  jxx++;
 }//jxx
 #endif //interpolatemode ==2 end
-
+#if  showcolorbar == true 
+}   
+#endif
 
 //this is end of 32*32 upscale of buffer
 //below ends the check buffer loop
@@ -1254,8 +1412,8 @@ raster_yxx +=  interpolateSampleDir;
 #if noisefilter > 0 & optimize == 2 //optimize needs to be 2 for noise filter to work
   } //we add in case noise filter code in existence
 #endif  
-//long tempt=micros()-timer;
-//Serial.println(tempt);
+long tempt=micros()-timer;
+Serial.println(tempt);
       i++;   
 //old way
   //         tft.fillRect(displayPixelHeight * (i /8), displayPixelWidth * (i % 8),
@@ -1318,28 +1476,7 @@ ix2*4,
 */
 #endif
 
-//this is last area before refresh
-#if show_temp_readout == true 
-
-#if temp_Fahrenhei == true
-//we convert to Fahrenheit!
-byte temperature= pixels[8*4+4]*1.8+32;//+pixels[8*4+5]*1.8+32+pixels[8*3+4]*1.8+32+pixels[8*3+5]*1.8+32)/4;// we sample 4 samples because center of screen is 4 samples
-#else
-byte temperature= (pixels[8*4+4]+pixels[8*4+5]+pixels[8*3+4]+pixels[8*3+5])/4;// we sample 4 samples because center of screen is 4 samples
-#endif
-
-
-
-//Serial.println(temperature);// for testing
-//we read from float buffer and convert to int, then convert to string output this method is ugly, just no reason to invest in better method.
-byte charplace1=temperature/10;//we have upper limit
-byte charplace2=temperature-charplace1*10;//we have upper limit
-tft.drawChar(64-11,64+5,48+charplace1,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
-tft.drawChar(64-10+11,64+5,48+charplace2,0xFFFF,0xFFFF,2);//already in code if same color, transperant background!
-tft.drawChar(60,60,111,0xFFFF,0xFFFF,1);//already in code if same color, transperant background!
-//tft.drawCircle(128/2,128/2,2,0xFFFF);
-//tft.drawCircle(65,64+7,1,0xFFFF);
-#endif
-
+displayaddons();//this is for bar and number showing
 }
+
 
