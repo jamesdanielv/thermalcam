@@ -19,7 +19,9 @@
   Written by Dean Miller for Adafruit Industries.
   BSD license, all text above must be included in any redistribution
  ***************************************************************************/
-
+//this version modified and optimized by james villeneuve
+// all text above must be included in any redistribution
+ ***************************************************************************/
 #include "Adafruit_GFX.h"    // Core graphics library
 #include "Adafruit_ST7735.h" // Hardware-specific library
 #include "SPIxx.h" //built in library should be SPI.h 
