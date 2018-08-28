@@ -1,5 +1,9 @@
 //this version is rewritten by james villeneuve (jamesdanielv). i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
-it is working and being tested on arudino ide 1.6.5
+it is working and being tested on arudino ide 1.6.5, and ide 1.8.5. 
+if using ide 1.8.5 set spi_optimized_st77xx false, true has display coruption if subpixelcoloroptimized =0 (one pixel )
+this does not have an effect on subpixelcoloroptimized if >0 (multipixel writes)
+
+
 updates will be posted first to here https://github.com/jamesdanielv/thermalcam/tree/updates-(possibly-unstable)
 to allow updates while keeping a stable buid.
 
