@@ -15,7 +15,7 @@ the advantage will come for faster processors in the sub pixel method that does 
 currently i have redesigned the sub sample system, and it will undergo further change possbily later. for now buffer needs to be about 1/4 size of final resolution, but all that is really needed is extra bytes interpolate side pixel information. for now it is easier to understand with full buffers. so eventually for example 64x64 will work on arduino with 2k of ram, even though an actual 64x64 buffer with 16 bit wide color values would normally be 8k, since output values are directly inerpolated to new values, 32x32 (2k 16 bit color) is max mem needed for 64x64 buffers. so this is why it is possible with atmega currently, even though buffers are not optimized they are 1/4 size! later on buffers will not be needed except for cache to send multiple writes to display at a time.
 
 with a parallel display more resolution is possible, also i think arduino and st77xx display can go up to 64x64 sub sampling
-with little issue (not bad!) but currently as of 8_5 it does up to 32x32.
+with little issue (not bad!) but currently as of <del>8_5 it does up to 32x32 </del>(9_1_18 added:it now does up to 64x64)
 some of the optimizations are due to multiple rectangle writes at a time. i have posted an article on hackaday and to there blog as well.
 article on hackaday https://hackaday.io/project/160498-arduino-spi-up-to-30-times-more-performance
 https://www.thingiverse.com/thing:3017556 color table generator javascript page automates table builds
