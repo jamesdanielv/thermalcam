@@ -36,5 +36,9 @@ this code works out of box (for fast testing), but the best method is to rewrite
 since display update is the most time intensive task (5000-7000 microseconds per pixel)
 (with my st77xx update it goes down to under 100 with same display!) i would imagine this code to scale performance across processor lines. much of improvement is on the bandwidth compression and ability to skip updating pixels where information does not change, until it does. some coding can be made more efficient, but the real issues are the display update speed. anything to reduce display writes increases performance. free memory has improved.
 
-there also is an alternate library for st77xx, this includes a fillRectFast, in place of fillRect. this command includes a method of bursting spi, so while spi data being sent, other data is loaded, this way spi is always busy, even at fastest clock speed of 8mhz.
+there also is an alternate library for st77xx, this includes a fillRectFast, in place of fillRect. this command includes a method of bursting spi, so while spi data being sent, other data is loaded, this way spi is always busy, even at fastest clock speed of 8mhz. 
+
+to enable faster method set spi_optimized_st77xx true
+however on 1.8.5 this method only works when sending more than one pixel at a time. ( possibly a bug)
+subpixelcoloroptimized 1 or greater it works fine still.
 
