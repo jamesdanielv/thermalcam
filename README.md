@@ -44,10 +44,16 @@ subpixelcoloroptimized 1 or greater it works fine still.
 
 
 some known issues working on: 
+
 shift in left and right side of display. 
+
 1200ms processing time of 64x64 loop (seems high, even though this is only code that can do it on arduino)
+
 code readability. need to clean up comments and seperate tasks into easily readable loops
+
 removal of full buffers for sub sample after first sub sample. 
+
 feel the need to up resolution to 128x128
+
 
 
