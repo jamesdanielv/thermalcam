@@ -42,3 +42,12 @@ to enable faster method set spi_optimized_st77xx true
 however on 1.8.5 this method only works when sending more than one pixel at a time. ( possibly a bug)
 subpixelcoloroptimized 1 or greater it works fine still.
 
+
+some known issues working on: 
+shift in left and right side of display. 
+1200ms processing time of 64x64 loop (seems high, even though this is only code that can do it on arduino)
+code readability. need to clean up comments and seperate tasks into easily readable loops
+removal of full buffers for sub sample after first sub sample. 
+feel the need to up resolution to 128x128
+
+
