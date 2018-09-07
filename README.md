@@ -19,10 +19,10 @@ in this iteration:
 
 coming soon or already in some form or another
 
-buffer removal 16x16 [ ] if checked done
+buffer removal 16x16 [x] if checked done (no longer needed. was used to sub sample for 32x32)
 
-buffer removal 32x32 [ ] if checked done
-
+buffer removal 32x32 [x] if checked done (now 40 bytes)
+buffer removal 64x64 [x] if checked done (now uses about 132 bytes total
 resolution increased to 128x128 [ ]
 
 include code for parallel display[ ]
