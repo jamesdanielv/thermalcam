@@ -15,7 +15,8 @@ in this iteration:
 3) working on main loops unrolling, and methods to do so nicely. seems up to 760 microseconds in calulations for 64x64
 
 4) added a subsample mode of -1 that ignors display update for timing. this is helpful for loop unroll and optimize calculations
-
+5) enhanced mode, interpits color varations and shadowing to double resolution detail. not just sub sampling.
+it also looks for small variations and enhances details. for example a hand with fingers. now fingers show. also reduced gloe effects surounding warm items. it is still there but sharper and more detail.
 
 coming soon or already in some form or another
 
