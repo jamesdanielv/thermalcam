@@ -22,7 +22,13 @@ coming soon or already in some form or another
 buffer removal 16x16 [x] if checked done (no longer needed. was used to sub sample for 32x32)
 
 buffer removal 32x32 [x] if checked done (now 40 bytes)
-buffer removal 64x64 [x] if checked done (now uses about 132 bytes total
+
+buffer removal 64x64 [x] if checked done (now uses about 132 bytes total for buffer
+
+one thing i realizes is that screen updates are quicker than the refresh rate of display. one of the reasons for pixelated effect. for now i switch to updating without interleaving, new method seems to run about 1200 microseconds from start to end of update to lcd. i think i can half this by implimenting a buffer for spi, or using a spi with buffer, this will allow code to run while processing remainder of spi instructions. if im creative about it ill have control over when data sent to spi, so no interupt needed.
+
+before i go to 128x128 i need to resolve some artifacts and target pattern that shows again in center. i'm not calculating something correctly. will find it and then the big jump to 128x128 
+
 resolution increased to 128x128 [ ]
 
 include code for parallel display[ ]
