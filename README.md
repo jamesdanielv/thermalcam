@@ -11,7 +11,8 @@ around line 1285 or so.....
 in this iteration:
 
 1) autorange temp feature, great for looking at heat at a distance, or more color details of current object
-2) pixel writes to 64 color rectangles at a time, however overhead of transfer seems to undermine gains so far
+2) pixel writes to 64 color rectangles at a time, split command up into segments because to much delay in loading and unloading 128 bytes into stack. now it only handles 8 bytes at a time and is 200-300microseconds faster!
+
 3) working on main loops unrolling, and methods to do so nicely. seems up to 760 microseconds in calulations for 64x64
 
 4) added a subsample mode of -1 that ignors display update for timing. this is helpful for loop unroll and optimize calculations
