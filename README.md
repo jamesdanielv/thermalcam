@@ -1,3 +1,5 @@
+keeping all develpoment in zip files to allow a central upload that i can link to. when goes to main branch will update files individually. for simplicity only 8x8 and 16x16 can use regular st77xx driver. making several pixel write routines was slowing down dev work. so 32x32 and above uses only advances pixel writes, no longer one at a time (normal driver) 
+
 read me changes here are simplified. the idea is to update this branch and when all modes tested, and features tested post to main branch. seems easier as people understand files are always changing, but it keeps updates to original files quickly (all at same time), and this can be done as i have time with it known some files may have errors.
 
 
