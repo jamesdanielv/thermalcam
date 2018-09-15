@@ -1,5 +1,5 @@
 //this version is rewritten by james villeneuve (jamesdanielv). i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
-it is working and being tested on arudino ide 1.6.5. 
+it is working and being tested on arudino ide 1.6.5. 1.8.5 works with default driver as long as spi burst is disabled. this has been fixed in https://github.com/jamesdanielv/thermalcam/tree/updates-(possibly-unstable) branch, and will be updated here after it passes all checks and latest updates are finnished.
 
 
 updates will be posted first to here https://github.com/jamesdanielv/thermalcam/tree/updates-(possibly-unstable)
