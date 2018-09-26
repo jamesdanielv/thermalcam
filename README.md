@@ -31,11 +31,11 @@ buffer removal 64x64 [x] if checked done (now uses about 132 bytes total for buf
 
 one thing i realized is that screen updates are quicker than the refresh rate of display. one of the reasons for pixelated effect. for now i switch to updating without interleaving, new method seems to run about 1200 microseconds from start to end of update to lcd. i think i can half this by implimenting a buffer for spi, or using a spi with buffer, this will allow code to run while processing remainder of spi instructions. if im creative about it ill have control over when data sent to spi, so no interupt needed. this is different than the spi bursting in lcd pixel writes. what im thinking of doing is send data to spi, and process most of spi during sub sample processing. with no interupt and direct ctrontrol i can write to spi up to 80 times during execution of code, so only loosing maybe 40-50 microseconds to load spi, to gain 600! (spi runs its own hardware seperate from the mcu.
 
-before i go to 128x128 i need to resolve some artifacts and target pattern that shows again in center. i'm not calculating something correctly. will find it and then the big jump to 128x128 
+i have had blockiness issues with 64 but most of these have now been resolved, i have moved on to creating 128x128 resolution and it now sort of works. blockiness issues are back, but can be resolved by averaging adjasent blocks, and averaging outer cell walls of 16x16 pixel blocks. at 16x oversampling this seems to be a good solution.
 
-resolution increased to 128x128 [ ]
+resolution increased to 128x128 [X]
 
-include code for parallel display[ ]
+include code for parallel display[ ]- may include using bitmap function in place of multi pixel mode, although it might not be as optimized.
 
 
 
