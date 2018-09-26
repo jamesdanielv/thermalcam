@@ -5,6 +5,8 @@ it is working and being tested on arudino ide 1.6.5. 1.8.5 works with default dr
 updates will be posted first to here https://github.com/jamesdanielv/thermalcam/tree/updates-(possibly-unstable)
 to allow updates while keeping a stable buid.
 
+in the future resolutions above interpolatemode of 2 will require use of included st77xx drivers.
+
 The included adafruit_amg88xx.cpp file has a #define AMG88xx_PIXEL_MIRROR true. default is false. flips data order.
 
 I designed a method of sub sampling that does not use floats, it works currently to 32x32 uno or equivilent and 64x64 (atmega or better) with st77xx display and arduino. spi mode,and pixel modes optimizations are more important on lower speed processors, however the more power does mean more resolution in the future, and ability to run several tasks together.
