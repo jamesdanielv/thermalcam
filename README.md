@@ -1,3 +1,10 @@
+stable branch is here, but it likely contains less features in favor of stability. https://github.com/jamesdanielv/thermalcam i post versions there after testing them extensively here. one thing i will do by default in stable version is set sketch to use adafruit code library thru a wrapper, this allows standard use of there drivers on many spi and parallel lcd displays. however the wrappper translation uses default spi drivers which are a lot slower than the ones in this branch are. this branch has a set of sketches that uses the wrapper by default as well. it is located here https://github.com/jamesdanielv/thermalcam/blob/updates-(possibly-unstable)/thermal_cam64x64_compatible_adrafruitdisplays.zip
+
+for any sketch files uploaded oct6,2018 or later to use the wrapper just change
+
+#define workAnyAdafruitDisplay false
+to #define workAnyAdafruitDisplay true
+
 keeping all develpoment in zip files to allow a central upload that i can link to. when goes to main branch will update files individually. for simplicity only 8x8 and 16x16 can use regular st77xx driver. making several pixel write routines was slowing down dev work. so 32x32 and above uses only advances pixel writes, no longer one at a time (normal driver) 
 
 read me changes here are simplified. the idea is to update this branch and when all modes tested, and features tested post to main branch. seems easier as people understand files are always changing, but it keeps updates to original files quickly (all at same time), and this can be done as i have time with it known some files may have errors.
