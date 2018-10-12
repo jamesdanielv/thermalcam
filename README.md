@@ -3,6 +3,9 @@ it is working and being tested on arudino ide 1.6.5. 1.8.5 works with default dr
 
 adafruit has done some driver changes recently. so to test this first make sure display is working using graphics test, and make sure amg8833 is working using temp tests that show temp on terminal. make sure pinouts are set to be the same as in this sketch file. then i would run a zipped version of sketch that has all files inside of it, including drivers that i have tested. then if you want updated adafruit drivers replace them and troubleshoot. 
 
+make sure all pins that are defined are defined to display driver 
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST); for example i tried an ili9341 adafruit driver that did not enable TFT_RTS pin Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC,TFT_RST ); notice that 3 pins are defined. this allows for control of lcd for reset, TFT_CS for select enabled and TFT_DC, device mode)
+
 updates will be posted first to here https://github.com/jamesdanielv/thermalcam/tree/updates-(possibly-unstable)
 to allow updates while keeping a stable buid.
 
