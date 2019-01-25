@@ -1,0 +1,482 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf400
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw12240\paperh20160\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 #if interpolatemode >3 //we use for 3 and 4 //this is for 8x8 sub sampling. \
+\
+ \
+uint16_t CreateSubPixels16x16(uint16_t pixelColor,uint16_t  sidepixelColor,uint16_t topOrBottomPixelColor,uint16_t diagnalPixelColor,bool xcenter, bool ycenter)\{ \
+  \
+ pixelColor+= pixelColorOffset;//this is for angle calculations corrections at this high resolution errors start to show from optics calc\
+ sidepixelColor+=sidepixelColorOffset;\
+ topOrBottomPixelColor+=topOrBottomPixelColorOffset;\
+ diagnalPixelColor+=diagnalPixelColorOffset;\
+if (xcenter)\{topbottomPixel=(pixelColor+topOrBottomPixelColor)/2;diagnolPixel=(pixelColor+pixelColor/2+diagnalPixelColor/2)/2;\}\
+if(!xcenter)\{topbottomPixel=(pixelColor+topOrBottomPixelColor)/2;diagnolPixel=(pixelColor+diagnalPixelColor)/2;\}\
+if (ycenter)\{mainPixel=pixelColor;sidePixel= (pixelColor+sidepixelColor)/2;diagnolPixel=(pixelColor+pixelColor/2+diagnalPixelColor/2)/2;\}\
+if (!ycenter)\{mainPixel=pixelColor; sidePixel= (pixelColor+pixelColor/2+sidepixelColor/2)/2;\}\
+uint16_t x1,x2,x3,x4,x5=0;//we define values as x0-x5 so we can write less and make more sence of data on side pixels\
+x3= (topOrBottomPixelColor+topbottomPixel)/2;\
+x4=(mainPixel+topOrBottomPixelColor+diagnalPixelColor+diagnalPixelColor)/4; \
+x1= sidepixelColor;//this shows how we solve for other pixels with partial information. code should be reduced from compiler\
+x2= (sidepixelColor+diagnalPixelColor)/2;\
+x5= (diagnolPixel+diagnolPixel+diagnolPixel+diagnalPixelColor)/4;//might need adj later on!\
+\
+\
+ bluroffset=- bluroffset;\
+//this is orginal calc  //* =pixels that meet at center\
+pixelsubsampledata[0]=mainPixel; \
+pixelsubsampledata[1]=(mainPixel+sidePixel)/2;\
+pixelsubsampledata[2]=sidePixel;\
+pixelsubsampledata[3]=(sidePixel+x1)/2;  //*\
+\
+pixelsubsampledata[4]=(mainPixel+topbottomPixel)/2 ;\
+pixelsubsampledata[5]=(mainPixel+diagnolPixel)/2;\
+pixelsubsampledata[6]=(sidePixel+diagnolPixel)/2; \
+\
+\
+pixelsubsampledata[8]=topbottomPixel;\
+pixelsubsampledata[9]=(topbottomPixel+diagnolPixel)/2 ;                                \
+pixelsubsampledata[10]=diagnolPixel;\
+\
+//these are bototm pixels\
+if (!xcenter)\{\
+pixelsubsampledata[3]=(sidePixel+x1)/2;  //*\
+pixelsubsampledata[7]=(sidePixel+x2)/2;  //*\
+pixelsubsampledata[11]=(diagnolPixel+x2)/2;//*\
+\}\
+if (xcenter)\{\
+pixelsubsampledata[3]=(sidePixel+sidePixel+sidePixel+sidePixel+sidePixel+sidePixel+sidePixel+x1)/8;  //*\
+pixelsubsampledata[7]=(sidePixel+sidePixel+sidePixel+sidePixel+sidePixel+sidePixel+sidePixel+x2)/8;  //*\
+pixelsubsampledata[11]=(diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+x2)/8;//*\
+\}\
+if (!ycenter)\{\
+pixelsubsampledata[12]=((topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+x3)/8 ;//*                                                                                            \
+pixelsubsampledata[13]=(topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+x4)/8;//*\
+pixelsubsampledata[14]=(diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+x4)/8;//*\
+\}\
+if (ycenter)\{\
+pixelsubsampledata[12]=((topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+(topbottomPixel+mainPixel)/2+x3)/8 ;//*                                                                                            \
+pixelsubsampledata[13]=(topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+topbottomPixel+x4)/8;//*\
+pixelsubsampledata[14]=(diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+diagnolPixel+x4)/8;//*\
+\}\
+pixelsubsampledata[15]=(diagnolPixel+diagnolPixel+diagnolPixel+x5)/4;//*\
+//pixelColor,uint16_t  sidepixelColor,uint16_t topOrBottomPixelColor,uint16_t diagnalPixelColor\
+if (xcenter &ycenter)\{pixelsubsampledata[15]=(diagnolPixel+x5)/2  ;\}\
+\
+\
+\
+#if enhancedDetail == true\
+\
+uint16_t center0=(pixelsubsampledata[0]+pixelsubsampledata[1]+pixelsubsampledata[4]+pixelsubsampledata[5])/4;\
+uint16_t center1=(pixelsubsampledata[2]+pixelsubsampledata[3]+pixelsubsampledata[6]+pixelsubsampledata[7])/4;\
+uint16_t center2=(pixelsubsampledata[8]+pixelsubsampledata[9]+pixelsubsampledata[12]+pixelsubsampledata[13])/4;\
+uint16_t center3=(pixelsubsampledata[10]+pixelsubsampledata[11]+pixelsubsampledata[14]+pixelsubsampledata[15])/4;\
+if (center0>pixelsubsampledata[0]) \{pixelsubsampledata[0]=pixelsubsampledata[0]-amount;\}else\{pixelsubsampledata[0]=pixelsubsampledata[0]+amounti;\};\
+if (center0>pixelsubsampledata[1]) \{pixelsubsampledata[1]=pixelsubsampledata[1]-amount;\}else\{pixelsubsampledata[1]=pixelsubsampledata[1]+amounti;\};\
+if (center0>pixelsubsampledata[4]) \{pixelsubsampledata[4]=pixelsubsampledata[4]-amount;\}else\{pixelsubsampledata[4]=pixelsubsampledata[4]+amounti;\};\
+if (center0>pixelsubsampledata[5]) \{pixelsubsampledata[5]=pixelsubsampledata[5]-amount;\}else\{pixelsubsampledata[5]=pixelsubsampledata[5]+amounti;\};\
+\
+if (center1>pixelsubsampledata[2]) \{pixelsubsampledata[2]=pixelsubsampledata[2]-amount;\}else\{pixelsubsampledata[2]=pixelsubsampledata[2]+amounti;\};\
+if (center1>pixelsubsampledata[3]) \{pixelsubsampledata[3]=pixelsubsampledata[3]-amount;\}else\{pixelsubsampledata[3]=pixelsubsampledata[3]+amounti;\};\
+if (center1>pixelsubsampledata[6]) \{pixelsubsampledata[6]=pixelsubsampledata[6]-amount;\}else\{pixelsubsampledata[6]=pixelsubsampledata[6]+amounti;\};\
+if (center1>pixelsubsampledata[7]) \{pixelsubsampledata[7]=pixelsubsampledata[7]-amount;\}else\{pixelsubsampledata[7]=pixelsubsampledata[7]+amounti;\};\
+\
+if (center2>pixelsubsampledata[8]) \{pixelsubsampledata[8]=pixelsubsampledata[8]-amount;\}else\{pixelsubsampledata[8]=pixelsubsampledata[8]+amounti;\};\
+if (center2>pixelsubsampledata[9]) \{pixelsubsampledata[9]=pixelsubsampledata[9]-amount;\}else\{pixelsubsampledata[9]=pixelsubsampledata[9]+amounti;\};\
+if (center2>pixelsubsampledata[12]) \{pixelsubsampledata[12]=pixelsubsampledata[12]-amount;\}else\{pixelsubsampledata[12]=pixelsubsampledata[12]+amounti;\};\
+if (center2>pixelsubsampledata[13]) \{pixelsubsampledata[13]=pixelsubsampledata[13]-amount;\}else\{pixelsubsampledata[13]=pixelsubsampledata[13]+amounti;\};\
+\
+if (center3>pixelsubsampledata[10]) \{pixelsubsampledata[10]=pixelsubsampledata[10]-amount;\}else\{pixelsubsampledata[10]=pixelsubsampledata[10]+amounti;\};\
+if (center3>pixelsubsampledata[11]) \{pixelsubsampledata[11]=pixelsubsampledata[11]-amount;\}else\{pixelsubsampledata[11]=pixelsubsampledata[11]+amounti;\};\
+if (center3>pixelsubsampledata[14]) \{pixelsubsampledata[14]=pixelsubsampledata[14]-amount;\}else\{pixelsubsampledata[14]=pixelsubsampledata[14]+amounti;\};\
+if (center3>pixelsubsampledata[15]) \{pixelsubsampledata[15]=pixelsubsampledata[15]-amount;\}else\{pixelsubsampledata[15]=pixelsubsampledata[15]+amounti;\};\
+pixelsubsampledata[5]-=amountc;pixelsubsampledata[6]-=amountc;pixelsubsampledata[9]-=amountc;pixelsubsampledata[10]-=amountc;\
+pixelsubsampledata[2]-=amountc;pixelsubsampledata[3]-=amountc;pixelsubsampledata[4]-=amountc;pixelsubsampledata[5]-=amountc;\
+pixelsubsampledata[9]-=amountc;pixelsubsampledata[11]-=amountc;pixelsubsampledata[13]-=amountc;pixelsubsampledata[14]-=amountc;\
+//pixel 5\
+if (pixelsubsampledata[5]>pixelsubsampledata[4])\{pixelsubsampledata[5]+=pop;\}if (pixelsubsampledata[5]>pixelsubsampledata[6])\{pixelsubsampledata[5]+=pop;\}\
+if (pixelsubsampledata[5]>pixelsubsampledata[1])\{pixelsubsampledata[5]+=pop;\}if (pixelsubsampledata[5]>pixelsubsampledata[9])\{pixelsubsampledata[5]+=pop;\}\
+//pixel 6\
+if (pixelsubsampledata[6]>pixelsubsampledata[5])\{pixelsubsampledata[6]+=pop;\}if (pixelsubsampledata[6]>pixelsubsampledata[7])\{pixelsubsampledata[6]+=pop;\}\
+if (pixelsubsampledata[6]>pixelsubsampledata[2])\{pixelsubsampledata[6]+=pop;\}if (pixelsubsampledata[6]>pixelsubsampledata[10])\{pixelsubsampledata[6]+=pop;\}\
+//pixel 9\
+if (pixelsubsampledata[9]>pixelsubsampledata[8])\{pixelsubsampledata[9]+=pop;\}if (pixelsubsampledata[9]>pixelsubsampledata[10])\{pixelsubsampledata[9]+=pop;\}\
+if (pixelsubsampledata[9]>pixelsubsampledata[6])\{pixelsubsampledata[9]+=pop;\}if (pixelsubsampledata[9]>pixelsubsampledata[14])\{pixelsubsampledata[9]+=pop;\}\
+//pixel 10\
+if (pixelsubsampledata[10]>pixelsubsampledata[9])\{pixelsubsampledata[10]+=pop;\}if (pixelsubsampledata[10]>pixelsubsampledata[11])\{pixelsubsampledata[10]+=pop;\}\
+if (pixelsubsampledata[10]>pixelsubsampledata[6])\{pixelsubsampledata[10]+=pop;\}if (pixelsubsampledata[10]>pixelsubsampledata[14])\{pixelsubsampledata[10]+=pop;\}\
+#endif\
+//since we recycled this from 32x32 mode we need to reasign values                        mainPixel=pixelColor;// just shown for sanity.compiler should remove it.\
+//[x 0][  1][x 2][  3][x 4][  5][x 6][ 7][x1][  ] --> each x is [x][s]                    sidePixel= (sidepixelColor+pixelColor)/2;//thes are effectively divided. \
+//[  8][  9][ 10][ 11][ 12][ 13][ 14][15][  ][  ]               [t][d] pixel data.        topbottomPixel=(pixelColor+topOrBottomPixelColor)/2;;//ditto\
+//[x16][ 17][x18][ 19][x20][ 21][x22][23][x2][  ]                                         diagnolPixel=(pixelColor+diagnalPixelColor)/2;;//ditto\
+//[ 24][ 25][ 26][ 27][ 28][ 29][ 30][31][  ][  ]\
+//[x32][ 33][x34][ 35][x36][ 37][x38][39][x3][  ]     from [ 0][ 1][ 2][ 3][][]\
+//[ 40][ 41][ 42][ 43][ 44][ 45][ 46][47][  ][  ]          [ 4][ 5][ 6][ 7][][]\
+//[x48][ 49][x50][ 51][x52][ 53][x54][55][x4][  ]          [ 8][ 9][10][11][][]\
+//[ 56][ 57][ 58][ 59][ 60][ 61][ 62][63][  ][  ]          [12][13][14][15][][]\
+//[ x5][   ][x6 ][   ][x7 ][   ][x8 ][  ][x9]              [  ][  ][  ][  ][][]  <--extra pixels we create from side pixel information\
+//we reasign and have more side data to look at, we need to break it down more as we are comparing more pixels\
+//we do thisls first, as data will be overwritted in others as we sub sample, so we copy data over in a way to get proper data. dont want to overwrite first then copy...\
+//soften around edges for pixe\
+#if glowreduction > 0 \
+for (byte i=0; i<16;i++)\{if (pixelsubsampledata[i]<pixelsubsampledata[i+1])\{pixelsubsampledata[i]-=glowreduction;\} \}\
+for (byte i=15; i>0;i--)\{if (pixelsubsampledata[i]<pixelsubsampledata[i-1])\{pixelsubsampledata[i]-=glowreduction;\} \}\
+#endif\
+\
+\
+pixelsubsampledata[0]=pixelsubsampledata[0];\
+pixelsubsampledata[18]=pixelsubsampledata[5];\
+\
+pixelsubsampledata[20]=pixelsubsampledata[6];\
+pixelsubsampledata[22]=pixelsubsampledata[7];\
+pixelsubsampledata[32]=pixelsubsampledata[8];\
+pixelsubsampledata[34]=pixelsubsampledata[9];                             \
+pixelsubsampledata[48]=pixelsubsampledata[12];                                                          \
+pixelsubsampledata[50]=pixelsubsampledata[13];\
+pixelsubsampledata[36]=pixelsubsampledata[10];\
+pixelsubsampledata[38]=pixelsubsampledata[11];\
+pixelsubsampledata[52]=pixelsubsampledata[14];\
+pixelsubsampledata[54]=pixelsubsampledata[15];\
+//these moved to prevent corrupt data\
+pixelsubsampledata[16]=pixelsubsampledata[4];\
+pixelsubsampledata[4]=pixelsubsampledata[2];\
+pixelsubsampledata[2]=pixelsubsampledata[1];\
+pixelsubsampledata[6]=pixelsubsampledata[3];\
+//this is only here for testing\
+#define valuecontrol //*54/64 //this is compensation for over power\
+uint16_t x6,x7,x8,x9;//we reasign and have more side data to look at, we need to break it down more as we are comparing more pixels\
+x9=x5 valuecontrol;x5=x3 valuecontrol;x7=x4 valuecontrol;x3=x2 valuecontrol;x1 =x1 valuecontrol;x8=(x7+x9)/2 valuecontrol\
+;x6=(x5+x7)/2 valuecontrol;\
+x4=(x9+x3)/2 valuecontrol;\
+x2= (x1+x3)/2 valuecontrol;//these use old values and average new ones out. we use 4x4 data as part of 16 x16. this is more generic averaging here\
+//here is the business end of 64 pixel calc, unrolled for performance\
+\
+\
+//64 is about more detail from info provided, \
+//we are making pixels hollow, and filled in color is greater or lesser\
+pixelsubsampledata[1]=0;pixelsubsampledata[3]=0;pixelsubsampledata[5]=0;pixelsubsampledata[7]=0;\
+pixelsubsampledata[8]=0;pixelsubsampledata[9]=0;pixelsubsampledata[10]=0;pixelsubsampledata[11]=0;\
+pixelsubsampledata[12]=0;pixelsubsampledata[13]=0;pixelsubsampledata[14]=0;pixelsubsampledata[15]=0;\
+\
+\
+for (byte i=0; i<63-16;i+=16)\{//last row we do manually\
+pixelsubsampledata[9+i]=(pixelsubsampledata[0+i]+pixelsubsampledata[2+i]+pixelsubsampledata[16+i]+pixelsubsampledata[18+i])/4;\
+pixelsubsampledata[11+i]=(pixelsubsampledata[2+i]+pixelsubsampledata[4+i]+pixelsubsampledata[18+i]+pixelsubsampledata[20+i])/4;\
+pixelsubsampledata[13+i]=(pixelsubsampledata[4+i]+pixelsubsampledata[6+i]+pixelsubsampledata[20+i]+pixelsubsampledata[22+i])/4;\
+pixelsubsampledata[15+i]=(pixelsubsampledata[6+i]);//+sidepixelColor)/2;\
+\}\
+//manual row\
+pixelsubsampledata[57]=(pixelsubsampledata[48]+pixelsubsampledata[50])/2;\
+pixelsubsampledata[59]=(pixelsubsampledata[50]+pixelsubsampledata[52])/2;\
+pixelsubsampledata[61]=(pixelsubsampledata[52]+pixelsubsampledata[54])/2;\
+pixelsubsampledata[63]=(pixelsubsampledata[54]+diagnalPixelColor)/2;\
+\
+for (byte i=0; i<63-16;i+=16)\{\
+pixelsubsampledata[1+i]=(pixelsubsampledata[0+i]+pixelsubsampledata[2+i])/2;\
+pixelsubsampledata[3+i]=(pixelsubsampledata[2+i]+pixelsubsampledata[4+i])/2;\
+pixelsubsampledata[5+i]=(pixelsubsampledata[4+i]+pixelsubsampledata[6+i])/2;\
+pixelsubsampledata[7+i]=(pixelsubsampledata[6+i]+pixelsubsampledata[15+i])/2;//+sidepixelColor)/2;\
+pixelsubsampledata[8+i]=(pixelsubsampledata[0+i]+pixelsubsampledata[9+i])/2;\
+pixelsubsampledata[10+i]=(pixelsubsampledata[2+i]+pixelsubsampledata[11+i])/2;\
+pixelsubsampledata[12+i]=(pixelsubsampledata[4+i]+pixelsubsampledata[13+i])/2;\
+pixelsubsampledata[14+i]=(pixelsubsampledata[13+i]+pixelsubsampledata[22+i])/2;//+sidepixelColor)/2;\
+\
+\}\
+//last data\
+pixelsubsampledata[49]=(pixelsubsampledata[48]+pixelsubsampledata[50])/2;//\
+pixelsubsampledata[51]=(pixelsubsampledata[50]+pixelsubsampledata[52])/2;//\
+pixelsubsampledata[53]=(pixelsubsampledata[52]+pixelsubsampledata[54])/2;//\
+pixelsubsampledata[55]=(pixelsubsampledata[54]+pixelsubsampledata[63])/2;///\
+pixelsubsampledata[56]=(pixelsubsampledata[48]+pixelsubsampledata[57])/2;//\
+pixelsubsampledata[58]=(pixelsubsampledata[57]+pixelsubsampledata[59])/2;//\
+pixelsubsampledata[60]=(pixelsubsampledata[59]+pixelsubsampledata[61])/2;//\
+pixelsubsampledata[62]=(pixelsubsampledata[61]+pixelsubsampledata[63])/2;//\
+//alternate for less color perception\
+\
+uint16_t tempholder;\
+tempholder=pixelsubsampledata[0];pixelsubsampledata[0]=pixelsubsampledata[1];pixelsubsampledata[1]=tempholder;\
+tempholder=pixelsubsampledata[2];pixelsubsampledata[2]=pixelsubsampledata[3];pixelsubsampledata[3]=tempholder;\
+tempholder=pixelsubsampledata[4];pixelsubsampledata[4]=pixelsubsampledata[5];pixelsubsampledata[5]=tempholder; \
+tempholder=pixelsubsampledata[6];pixelsubsampledata[6]=pixelsubsampledata[7];pixelsubsampledata[7]=tempholder; \
+tempholder=pixelsubsampledata[56];pixelsubsampledata[56]=pixelsubsampledata[57];pixelsubsampledata[57]=tempholder;\
+tempholder=pixelsubsampledata[58];pixelsubsampledata[58]=pixelsubsampledata[59];pixelsubsampledata[59]=tempholder;\
+tempholder=pixelsubsampledata[60];pixelsubsampledata[60]=pixelsubsampledata[61];pixelsubsampledata[61]=tempholder;\
+tempholder=pixelsubsampledata[62];pixelsubsampledata[62]=pixelsubsampledata[63];pixelsubsampledata[63]=tempholder;\
+\
+tempholder=pixelsubsampledata[0];pixelsubsampledata[0]=pixelsubsampledata[8];pixelsubsampledata[8]=tempholder;\
+tempholder=pixelsubsampledata[16];pixelsubsampledata[16]=pixelsubsampledata[24];pixelsubsampledata[24]=tempholder;\
+tempholder=pixelsubsampledata[32];pixelsubsampledata[32]=pixelsubsampledata[40];pixelsubsampledata[40]=tempholder;\
+tempholder=pixelsubsampledata[48];pixelsubsampledata[48]=pixelsubsampledata[56];pixelsubsampledata[56]=tempholder;\
+tempholder=pixelsubsampledata[7];pixelsubsampledata[7]=pixelsubsampledata[15];pixelsubsampledata[15]=tempholder;\
+tempholder=pixelsubsampledata[23];pixelsubsampledata[23]=pixelsubsampledata[31];pixelsubsampledata[31]=tempholder;\
+tempholder=pixelsubsampledata[39];pixelsubsampledata[39]=pixelsubsampledata[47];pixelsubsampledata[47]=tempholder;\
+tempholder=pixelsubsampledata[55];pixelsubsampledata[55]=pixelsubsampledata[63];pixelsubsampledata[63]=tempholder;\
+//pixelsubsampledata[62]=0;\
+#if blocKinessRemovalFilter>0\
+bluroffset=- bluroffset;\
+pixelsubsampledata[0]+=bluroffset;\
+pixelsubsampledata[1]-=bluroffset;\
+pixelsubsampledata[2]+=bluroffset;\
+pixelsubsampledata[3]-=bluroffset;\
+pixelsubsampledata[4]+=bluroffset;\
+pixelsubsampledata[5]-=bluroffset;\
+pixelsubsampledata[6]+=bluroffset;\
+pixelsubsampledata[7]-=bluroffset;\
+\
+pixelsubsampledata[8]-=bluroffset;\
+pixelsubsampledata[9]+=bluroffset;\
+pixelsubsampledata[10]-=bluroffset;\
+pixelsubsampledata[11]+=bluroffset;\
+pixelsubsampledata[12]-=bluroffset;\
+pixelsubsampledata[13]+=bluroffset;\
+pixelsubsampledata[14]-=bluroffset;\
+pixelsubsampledata[15]+=bluroffset;\
+\
+pixelsubsampledata[16]+=bluroffset;\
+pixelsubsampledata[17]-=bluroffset;\
+pixelsubsampledata[18]+=bluroffset;\
+pixelsubsampledata[19]-=bluroffset;\
+pixelsubsampledata[20]+=bluroffset;\
+pixelsubsampledata[21]-=bluroffset;\
+pixelsubsampledata[22]+=bluroffset;\
+pixelsubsampledata[23]-=bluroffset;\
+\
+pixelsubsampledata[24]-=bluroffset;\
+pixelsubsampledata[25]+=bluroffset;\
+pixelsubsampledata[26]-=bluroffset;\
+pixelsubsampledata[27]+=bluroffset;\
+pixelsubsampledata[28]-=bluroffset;\
+pixelsubsampledata[29]+=bluroffset;\
+pixelsubsampledata[30]-=bluroffset;\
+pixelsubsampledata[31]+=bluroffset;\
+\
+pixelsubsampledata[32]+=bluroffset;\
+pixelsubsampledata[33]-=bluroffset;\
+pixelsubsampledata[34]+=bluroffset;\
+pixelsubsampledata[35]-=bluroffset;\
+pixelsubsampledata[36]+=bluroffset;\
+pixelsubsampledata[37]-=bluroffset;\
+pixelsubsampledata[38]+=bluroffset;\
+pixelsubsampledata[39]-=bluroffset;\
+\
+pixelsubsampledata[40]-=bluroffset;\
+pixelsubsampledata[41]+=bluroffset;\
+pixelsubsampledata[42]-=bluroffset;\
+pixelsubsampledata[43]+=bluroffset;\
+pixelsubsampledata[44]-=bluroffset;\
+pixelsubsampledata[45]+=bluroffset;\
+pixelsubsampledata[46]-=bluroffset;\
+pixelsubsampledata[47]+=bluroffset;\
+\
+pixelsubsampledata[48]+=bluroffset;\
+pixelsubsampledata[49]-=bluroffset;\
+pixelsubsampledata[50]+=bluroffset;\
+pixelsubsampledata[51]-=bluroffset;\
+pixelsubsampledata[52]+=bluroffset;\
+pixelsubsampledata[53]-=bluroffset;\
+pixelsubsampledata[54]+=bluroffset;\
+pixelsubsampledata[55]-=bluroffset;\
+\
+pixelsubsampledata[56]-=bluroffset;\
+pixelsubsampledata[57]+=bluroffset;\
+pixelsubsampledata[58]-=bluroffset;\
+pixelsubsampledata[59]+=bluroffset;\
+pixelsubsampledata[60]-=bluroffset;\
+pixelsubsampledata[61]+=bluroffset;\
+pixelsubsampledata[62]-=bluroffset;\
+pixelsubsampledata[63]+=bluroffset;\
+#endif //blockiness removal filter\
+//here code is different again for 128x128 samples. it takes 8x8 code, and up scans it to 16 x16\
+//first we remap data to equivilent space\
+uint16_t tempbytes[64];//we use to hold data as we overwrite it. we will make more effient later on. for now we are just getting it to work\
+for (int i=0;i<64; i++)\{    //store data in temps\
+tempbytes[i]=pixelsubsampledata[i];\
+\}\
+for (byte i=0;i<64; i+=8)\{    //store data in temps\
+pixelsubsampledata[i*4+0]=tempbytes[i+0];//[0]*\
+pixelsubsampledata[i*4+2]=tempbytes[i+1];//[16]\
+pixelsubsampledata[i*4+4]=tempbytes[i+2];//[32]\
+pixelsubsampledata[i*4+6]=tempbytes[i+3];//[48]\
+pixelsubsampledata[i*4+8]=tempbytes[i+4];//[64]\
+pixelsubsampledata[i*4+10]=tempbytes[i+5];//[80]\
+pixelsubsampledata[i*4+12]=tempbytes[i+6];//[96]\
+pixelsubsampledata[i*4+14]=tempbytes[i+7];//[112]\
+\
+\}\
+\
+for ( byte i=0;i<256-32;i+=32)\{//this loop empties out what should be blank after copy.\
+pixelsubsampledata[1+i]=0;//efficiency will make this redundant later on but now for testing...\
+pixelsubsampledata[3+i]=0;\
+pixelsubsampledata[5+i]=0;\
+pixelsubsampledata[7+i]=0;\
+pixelsubsampledata[9+i]=0;\
+pixelsubsampledata[11+i]=0;\
+pixelsubsampledata[13+i]=0;\
+pixelsubsampledata[15+i]=0;\
+pixelsubsampledata[16+i]=0;\
+pixelsubsampledata[17+i]=0;\
+pixelsubsampledata[18+i]=0;\
+pixelsubsampledata[19+i]=0;\
+pixelsubsampledata[20+i]=0;\
+pixelsubsampledata[21+i]=0;\
+pixelsubsampledata[22+i]=0;\
+pixelsubsampledata[23+i]=0;\
+pixelsubsampledata[24+i]=0;\
+pixelsubsampledata[25+i]=0;\
+pixelsubsampledata[26+i]=0;\
+pixelsubsampledata[27+i]=0;\
+pixelsubsampledata[28+i]=0;\
+pixelsubsampledata[29+i]=0;\
+pixelsubsampledata[30+i]=0;\
+pixelsubsampledata[31+i]=0;\
+\
+\}\
+\
+//here we fill in the holes.\
+for ( int i=0;i<256;i+=32)\{\
+pixelsubsampledata[1+i]=(pixelsubsampledata[0+i]+pixelsubsampledata[2+i])/2;\
+pixelsubsampledata[3+i]=(pixelsubsampledata[2+i]+pixelsubsampledata[4+i])/2;\
+pixelsubsampledata[5+i]=(pixelsubsampledata[4+i]+pixelsubsampledata[6+i])/2;\
+pixelsubsampledata[7+i]=(pixelsubsampledata[6+i]+pixelsubsampledata[8+i])/2;\
+pixelsubsampledata[9+i]=(pixelsubsampledata[8+i]+pixelsubsampledata[10+i])/2;\
+pixelsubsampledata[11+i]=(pixelsubsampledata[10+i]+pixelsubsampledata[12+i])/2;\
+pixelsubsampledata[13+i]=(pixelsubsampledata[12+i]+pixelsubsampledata[14+i])/2;\
+//pixelsubsampledata[14+i]=(pixelsubsampledata[13+i]+pixelsubsampledata[15+i])/2;//testing color between pixels\
+\} \
+//we do last column manually with information from next pixel\
+pixelsubsampledata[15]=(pixelsubsampledata[14]*4+sidepixelColor+sidepixelColor+topOrBottomPixelColor+topOrBottomPixelColor)/8;\
+pixelsubsampledata[31]=(pixelsubsampledata[30]*4+sidepixelColor+sidepixelColor+topOrBottomPixelColor+sidepixelColor)/8;\
+pixelsubsampledata[47]=(pixelsubsampledata[46]*4+sidepixelColor+topOrBottomPixelColor+sidepixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[63]=(pixelsubsampledata[62]*4+sidepixelColor+topOrBottomPixelColor+sidepixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[79]=(pixelsubsampledata[78]*4+sidepixelColor+topOrBottomPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[95]=(pixelsubsampledata[94]*4+sidepixelColor+topOrBottomPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[111]=(pixelsubsampledata[110]*4+sidepixelColor+topOrBottomPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[127]=(pixelsubsampledata[126]*4+sidepixelColor+sidepixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[143]=(pixelsubsampledata[142]*4+sidepixelColor+sidepixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[159]=(pixelsubsampledata[158]*4+sidepixelColor+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[175]=(pixelsubsampledata[174]*4+sidepixelColor+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[191]=(pixelsubsampledata[190]*4+sidepixelColor+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[207]=(pixelsubsampledata[206]*4+sidepixelColor+sidepixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[223]=(pixelsubsampledata[222]*4+sidepixelColor+sidepixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[239]=(pixelsubsampledata[238]*4+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+pixelsubsampledata[255]=(pixelsubsampledata[254]*4+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor+diagnalPixelColor)/8;\
+for ( int i=0;i<256-32;i+=32)\{  \
+pixelsubsampledata[16+i]=(pixelsubsampledata[0+i]+pixelsubsampledata[32+i])/2;\
+pixelsubsampledata[17+i]=(pixelsubsampledata[1+i]+pixelsubsampledata[33+i])/2;\
+pixelsubsampledata[18+i]=(pixelsubsampledata[2+i]+pixelsubsampledata[34+i])/2;\
+pixelsubsampledata[19+i]=(pixelsubsampledata[3+i]+pixelsubsampledata[35+i])/2;\
+pixelsubsampledata[20+i]=(pixelsubsampledata[4+i]+pixelsubsampledata[36+i])/2;\
+pixelsubsampledata[21+i]=(pixelsubsampledata[5+i]+pixelsubsampledata[37+i])/2;\
+pixelsubsampledata[22+i]=(pixelsubsampledata[6+i]+pixelsubsampledata[38+i])/2;\
+pixelsubsampledata[23+i]=(pixelsubsampledata[7+i]+pixelsubsampledata[39+i])/2;\
+pixelsubsampledata[24+i]=(pixelsubsampledata[8+i]+pixelsubsampledata[40+i])/2;\
+pixelsubsampledata[25+i]=(pixelsubsampledata[9+i]+pixelsubsampledata[41+i])/2;\
+pixelsubsampledata[26+i]=(pixelsubsampledata[10+i]+pixelsubsampledata[42+i])/2;\
+pixelsubsampledata[27+i]=(pixelsubsampledata[11+i]+pixelsubsampledata[43+i])/2;\
+pixelsubsampledata[28+i]=(pixelsubsampledata[12+i]+pixelsubsampledata[44+i])/2;\
+pixelsubsampledata[29+i]=(pixelsubsampledata[13+i]+pixelsubsampledata[45+i])/2;\
+pixelsubsampledata[30+i]=(pixelsubsampledata[14+i]+pixelsubsampledata[46+i])/2;\
+pixelsubsampledata[31+i]=(pixelsubsampledata[15+i]+pixelsubsampledata[47+i])/2;\
+\
+\}\
+//now we correct for last row\
+\
+pixelsubsampledata[241]=(pixelsubsampledata[224]+pixelsubsampledata[226])/2;\
+pixelsubsampledata[243]=(pixelsubsampledata[226]+pixelsubsampledata[228])/2;\
+pixelsubsampledata[245]=(pixelsubsampledata[228]+pixelsubsampledata[230])/2;\
+pixelsubsampledata[247]=(pixelsubsampledata[230]+pixelsubsampledata[232])/2;\
+pixelsubsampledata[249]=(pixelsubsampledata[232]+pixelsubsampledata[234])/2;\
+pixelsubsampledata[251]=(pixelsubsampledata[234]+pixelsubsampledata[236])/2;\
+pixelsubsampledata[253]=(pixelsubsampledata[236]+pixelsubsampledata[238])/2;\
+pixelsubsampledata[255]=(pixelsubsampledata[238]+diagnalPixelColor)/2;\
+//we finsh stitching and averaging\
+pixelsubsampledata[240]=(pixelsubsampledata[224]+pixelsubsampledata[241])/2;//special processing. this pixel\
+pixelsubsampledata[242]=(pixelsubsampledata[241]+pixelsubsampledata[243])/2;\
+pixelsubsampledata[244]=(pixelsubsampledata[243]+pixelsubsampledata[245])/2;\
+pixelsubsampledata[246]=(pixelsubsampledata[245]+pixelsubsampledata[247])/2;\
+pixelsubsampledata[248]=(pixelsubsampledata[247]+pixelsubsampledata[249])/2;\
+pixelsubsampledata[250]=(pixelsubsampledata[249]+pixelsubsampledata[251])/2;\
+pixelsubsampledata[252]=(pixelsubsampledata[251]+pixelsubsampledata[253])/2;\
+pixelsubsampledata[254]=(pixelsubsampledata[253]+pixelsubsampledata[255])/2;\
+\
+//alternate for less color perception across edges\
+//we stich pattern right side, left side, and top and bottom to make color variations less noticeable to the eye. it is a cheap trick \
+//uint16_t tempholder;// but at this resolution and higher it becomes increadibly difficult to approximate the lighting from each other pixel.\
+//this method however crued, works because it averages the differences between both the next and previous pixel, wich is the desired outcome.\
+tempholder=pixelsubsampledata[0];pixelsubsampledata[0]=pixelsubsampledata[1];pixelsubsampledata[1]=tempholder;\
+tempholder=pixelsubsampledata[2];pixelsubsampledata[2]=pixelsubsampledata[3];pixelsubsampledata[3]=tempholder;\
+tempholder=pixelsubsampledata[4];pixelsubsampledata[4]=pixelsubsampledata[5];pixelsubsampledata[5]=tempholder; \
+tempholder=pixelsubsampledata[6];pixelsubsampledata[6]=pixelsubsampledata[7];pixelsubsampledata[7]=tempholder; \
+tempholder=pixelsubsampledata[8];pixelsubsampledata[8]=pixelsubsampledata[9];pixelsubsampledata[9]=tempholder; \
+tempholder=pixelsubsampledata[10];pixelsubsampledata[10]=pixelsubsampledata[11];pixelsubsampledata[11]=tempholder; \
+tempholder=pixelsubsampledata[12];pixelsubsampledata[12]=pixelsubsampledata[13];pixelsubsampledata[13]=tempholder; \
+tempholder=pixelsubsampledata[14];pixelsubsampledata[14]=pixelsubsampledata[15];pixelsubsampledata[15]=tempholder; \
+\
+tempholder=pixelsubsampledata[240];pixelsubsampledata[240]=pixelsubsampledata[241];pixelsubsampledata[241]=tempholder;\
+tempholder=pixelsubsampledata[242];pixelsubsampledata[242]=pixelsubsampledata[243];pixelsubsampledata[243]=tempholder;\
+tempholder=pixelsubsampledata[244];pixelsubsampledata[244]=pixelsubsampledata[245];pixelsubsampledata[245]=tempholder; \
+tempholder=pixelsubsampledata[246];pixelsubsampledata[246]=pixelsubsampledata[247];pixelsubsampledata[247]=tempholder; \
+tempholder=pixelsubsampledata[248];pixelsubsampledata[248]=pixelsubsampledata[249];pixelsubsampledata[249]=tempholder; \
+tempholder=pixelsubsampledata[250];pixelsubsampledata[250]=pixelsubsampledata[251];pixelsubsampledata[251]=tempholder; \
+tempholder=pixelsubsampledata[252];pixelsubsampledata[252]=pixelsubsampledata[253];pixelsubsampledata[253]=tempholder; \
+tempholder=pixelsubsampledata[254];pixelsubsampledata[254]=pixelsubsampledata[255];pixelsubsampledata[255]=tempholder; \
+\
+\
+/*\
+tempholder=pixelsubsampledata[56];pixelsubsampledata[56]=pixelsubsampledata[57];pixelsubsampledata[57]=tempholder;\
+tempholder=pixelsubsampledata[58];pixelsubsampledata[58]=pixelsubsampledata[59];pixelsubsampledata[59]=tempholder;\
+tempholder=pixelsubsampledata[60];pixelsubsampledata[60]=pixelsubsampledata[61];pixelsubsampledata[61]=tempholder;\
+tempholder=pixelsubsampledata[62];pixelsubsampledata[62]=pixelsubsampledata[63];pixelsubsampledata[63]=tempholder;\
+\
+\
+\
+\
+tempholder=pixelsubsampledata[56];pixelsubsampledata[56]=pixelsubsampledata[57];pixelsubsampledata[57]=tempholder;\
+tempholder=pixelsubsampledata[58];pixelsubsampledata[58]=pixelsubsampledata[59];pixelsubsampledata[59]=tempholder;\
+tempholder=pixelsubsampledata[60];pixelsubsampledata[60]=pixelsubsampledata[61];pixelsubsampledata[61]=tempholder;\
+tempholder=pixelsubsampledata[62];pixelsubsampledata[62]=pixelsubsampledata[63];pixelsubsampledata[63]=tempholder;\
+tempholder=pixelsubsampledata[0];pixelsubsampledata[0]=pixelsubsampledata[8];pixelsubsampledata[8]=tempholder;\
+tempholder=pixelsubsampledata[16];pixelsubsampledata[16]=pixelsubsampledata[24];pixelsubsampledata[16]=tempholder;\
+tempholder=pixelsubsampledata[32];pixelsubsampledata[32]=pixelsubsampledata[40];pixelsubsampledata[40]=tempholder;\
+tempholder=pixelsubsampledata[48];pixelsubsampledata[48]=pixelsubsampledata[56];pixelsubsampledata[56]=tempholder;\
+tempholder=pixelsubsampledata[7];pixelsubsampledata[7]=pixelsubsampledata[15];pixelsubsampledata[15]=tempholder;\
+tempholder=pixelsubsampledata[23];pixelsubsampledata[23]=pixelsubsampledata[31];pixelsubsampledata[31]=tempholder;\
+tempholder=pixelsubsampledata[39];pixelsubsampledata[39]=pixelsubsampledata[47];pixelsubsampledata[47]=tempholder;\
+tempholder=pixelsubsampledata[55];pixelsubsampledata[55]=pixelsubsampledata[63];pixelsubsampledata[63]=tempholder;\
+//pixelsubsampledata[62]=0;\
+\
+*/\
+//high res blockiness fix.\
+for (byte i=0;i<255-16;i+=16)\{\
+pixelsubsampledata[0+i]-=bluroffset;\
+pixelsubsampledata[1+i]+=bluroffset;\
+pixelsubsampledata[2+i]-=bluroffset;\
+pixelsubsampledata[3+i]+=bluroffset;\
+pixelsubsampledata[4+i]-=bluroffset;\
+pixelsubsampledata[5+i]+=bluroffset;\
+pixelsubsampledata[6+i]-=bluroffset;\
+pixelsubsampledata[7+i]+=bluroffset;\
+pixelsubsampledata[8+i]-=bluroffset;\
+pixelsubsampledata[9+i]+=bluroffset;\
+pixelsubsampledata[10+i]-=bluroffset;\
+pixelsubsampledata[11+i]+=bluroffset;\
+pixelsubsampledata[12+i]-=bluroffset;\
+pixelsubsampledata[13+i]+=bluroffset;\
+pixelsubsampledata[14+i]-=bluroffset;\
+pixelsubsampledata[15+i]+=bluroffset;\
+\}\
+for (int i=0;i<256;i+=2)\{//this should skip last pixel in each row. we will get it on other one!\
+pixelsubsampledata[i]=(pixelsubsampledata[i+1]+pixelsubsampledata[i])/2;//we average out\
+\
+\
+\}\
+\
+ uint16_t i=0;while( i <256)\{if (pixelsubsampledata[i]<SubtractColor)\{pixelsubsampledata[i]=0;\};i++;\}\
+\
+\}\
+#endif}
