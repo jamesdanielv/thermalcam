@@ -1,4 +1,4 @@
-NOTICE. i will be making a new settings code page, to swith settings easily between displays and resolution settings, and sensor types. this will take place in january, and all the zip files will be deleted, and code will once again be stored unzipped, and only 1 version available, with settings changes easily made depending on compatible display, and sensore, and output resolution. again these changes will take place at some point in time after january 2019. 
+old files are archined in thermaloldFiles.zip. as of 2019 individual profiles will not be updated. read features file to see how to change settings.
 
 latest image showing V5 https://github.com/jamesdanielv/thermalcam/blob/updates-(possibly-unstable)/V5.png
 
