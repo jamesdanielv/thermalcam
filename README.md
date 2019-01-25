@@ -1,3 +1,7 @@
+Notice: next update will move more of the upsample into a seperate folder for mutlipurpose use and clean up code. 
+
+
+
 old files are archined in thermaloldFiles.zip. as of 2019 individual profiles will not be updated. read features file to see how to change settings.
 
 latest image showing V5 https://github.com/jamesdanielv/thermalcam/blob/updates-(possibly-unstable)/V5.png
