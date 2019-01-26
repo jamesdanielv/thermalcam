@@ -1,0 +1,19 @@
+Frequently asked questions
+
+how do i change lcd from ili9341 to st7735? tab into AAlcd_mode,h and look for #define lcd_mode change it to #define lcd_mode 1 or #define lcd_mode 0 depending on what comments say in that folder of arduino ide
+
+How do i change to MLX90460 sensor? this sensor is not supported yet. code will start showing up for it and when it is supported i will indicate it in readme file.
+
+
+does this work for my display? 
+i only test it for st7735 128x128 adafruit display
+and ili9341 240x320 displays.
+
+how do i get higher resolution settings?
+ look for interpolation and change it from 0-3, sometimes 4 works depending on display resolution and setup
+
+how do i get min and max temp blocks to show?
+change #define SquareBlockHighLowTemp true
+
+what are all these other settings?
+read https://github.com/jamesdanielv/thermalcam/blob/updates-(possibly-unstable)/featureList.pdf it contains a brief description. some features are experimental.
