@@ -1,4 +1,4 @@
-Notice: next update will move more of the upsample into a seperate folder for mutlipurpose use and clean up code. 
+Notice: next update will include a upsample.h that will move upscale into its own folder. this also will allow for compatablity without need for modified display drivers.
 
 I only officially support st7735 128x128 sold by adafruit and ili9341 320x240 displays. these are the only onse with display drivers i have modified for fast acceleration. there are universal drivers im working on, but i don't know when released.
 
