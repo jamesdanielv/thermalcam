@@ -5,6 +5,8 @@ Notice: next update will include a upsample.h that will move upscale into its ow
 
 I only officially support st7735 128x128 sold by adafruit and ili9341 320x240 displays. these are the only ones with display drivers i have modified for fast acceleration. there are universal drivers im working on, but i don't know when released.
 
+i also have created drivers that support 128x160 displays. but i do not officially support them! 
+
 please read faqs and featureslist before emailing me. if you want a specific configuration look in thermalOldFiles archivese
 the links are included below for faqs, featureslist, thermalOldFiles:
 https://github.com/jamesdanielv/thermalcam/blob/updates-(possibly-unstable)/FAQS_frequentyAskedQuestions
