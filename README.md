@@ -7,6 +7,10 @@ I only officially support st7735 128x128 sold by adafruit and ili9341 320x240 di
 
 i also have created drivers that support 128x160 displays. but i do not officially support them! 
 
+if you want output in deg C then change #define temp_Fahrenheit false
+
+
+
 please read faqs and featureslist before emailing me. if you want a specific configuration look in thermalOldFiles archivese
 the links are included below for faqs, featureslist, thermalOldFiles:
 https://github.com/jamesdanielv/thermalcam/blob/updates-(possibly-unstable)/FAQS_frequentyAskedQuestions
