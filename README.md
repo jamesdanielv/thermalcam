@@ -1,6 +1,8 @@
 //this version is rewritten by james villeneuve (jamesdanielv). i am thankful to the MIT code included, and adafruit for the immense time savings they game me for providing functional code. it allowed me to work on efficiency methods.
 it is working and being tested on arudino ide 1.6.5. 1.8.5 works with default driver as long as spi burst is disabled. this has been fixed in https://github.com/jamesdanielv/thermalcam/tree/updates-(possibly-unstable) branch, and will be updated here after it passes all checks and latest updates are finnished.
 
+if you want output to be in deg c, then change line around line number 107 to #define temp_Fahrenheit false
+
 adafruit has done some driver changes recently. so to test this first make sure display is working using graphics test, and make sure amg8833 is working using temp tests that show temp on terminal. make sure pinouts are set to be the same as in this sketch file. then i would run a zipped version of sketch that has all files inside of it, including drivers that i have tested. then if you want updated adafruit drivers replace them and troubleshoot. 
 
 make sure all pins that are defined are defined to display driver 
